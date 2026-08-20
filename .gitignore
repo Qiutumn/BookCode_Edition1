@@ -135,3 +135,6 @@ dmypy.json
 
 _build
 .idea/
+# zh/ Chinese translation build artifacts
+.venv/
+!zh/**/*_files/*.png

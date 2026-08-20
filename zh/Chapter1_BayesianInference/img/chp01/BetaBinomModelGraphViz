@@ -1,0 +1,13 @@
+digraph {
+	graph [dpi=300]
+	"θ" [label="θ
+~
+Beta" shape=ellipse]
+	subgraph cluster20 {
+		y_obs [label="y_obs
+~
+Binomial" shape=ellipse style=filled]
+		label=20 labeljust=r labelloc=b style=rounded
+	}
+	"θ" -> y_obs
+}
