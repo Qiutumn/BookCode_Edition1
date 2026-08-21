@@ -1,7 +1,8 @@
 # 中文版构建说明
 
-本目录保存《Probabilistic Programming and Bayesian Methods for Hackers》的
-中文翻译与现代化代码。构建系统以可审查、可复现和“不覆盖源文件”为原则。
+本目录保存《Bayesian Modeling and Computation in Python》（Martin、Kumar、Lao
+著，Chapman & Hall/CRC，2021）的中文翻译与现代化代码。构建系统以可审查、
+可复现和“不覆盖源文件”为原则。
 
 ## 哪些文件可以编辑
 
@@ -75,16 +76,24 @@ Notebook 由 `nbclient` 在对应章目录中执行，因此代码中的 `data/.
 
 依赖按执行栈保存在 `environments/`：
 
-- `core`：Notebook 构建、验证与执行工具；
-- `pymc`：目前第 1–3 章使用的科学计算/PyMC 栈；
-- `tfp`：已在本机验证的 TensorFlow Probability 栈；
+- `core`：Notebook 构建、验证与执行工具，全书各单元共用；
+- `pymc`：科学计算/PyMC 基础栈，第 1、2、3–9、10、11 章及大部分前后
+  辅文都依赖它；
+- `tfp`：已在本机验证的 TensorFlow Probability 栈（第 3、4、6、10、11 章）；
+- `bart`：第 7 章专用的 PyMC-BART 扩展。`bart.in` 中的版本是研究后固定的
+  组合，但本机两个可用 Python 环境都未能安装 `pymc-bart`，因此第 7 章至今
+  只完成了静态校验，从未在本机真正执行过；
+- `ml`：第 8 章随机森林 ABC 模型选择所需的 scikit-learn，已在本机验证
+  （`scikit-learn==1.9.0`，37/37 代码单元零错误执行）；
+- `ppl`：第 10 章 JAX/NumPyro 扩展，与已验证的 TensorFlow Probability 0.25
+  搭配使用；
 - `optional-jax`、`optional-modeling`：尚未在本机安装验证，只有未解析输入，
   在相应章节发布前必须在目标平台解析、固定版本并测试。
 
-默认 `requirements.txt` 只组合当前可用章节所需的 `core` 与 `pymc` 直接依赖。
-精确版本来自 2026-08-20 的 Python 3.12.3 项目环境，不声称是完整的传递依赖
-冻结。安装后必须运行 `python -m pip check`。系统包及 Pandoc/Graphviz 说明见
-`environments/system-dependencies.md`。
+默认 `requirements.txt` 只组合 `core` 与 `pymc` 直接依赖，用于最小化安装第
+1–2 章。精确版本来自 2026-08-20 的 Python 3.12.3 项目环境，不声称是完整的
+传递依赖冻结。安装后必须运行 `python -m pip check`。系统包及
+Pandoc/Graphviz 说明见 `environments/system-dependencies.md`。
 
 ## 许可
 

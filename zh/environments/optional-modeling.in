@@ -1,7 +1,8 @@
 # UNRESOLVED OPTIONAL STACK.
-# Bambi, PyMC-BART, and seaborn were not installed in the verified environment.
-# Resolve and pin compatible versions before releasing a unit that depends on
-# this modeling extension group.
+# Bambi and seaborn were not installed in the verified environment. Resolve
+# and pin compatible versions before releasing a unit that depends on this
+# modeling extension group. PyMC-BART has its own dedicated, version-pinned
+# group in bart.in and was removed from here to avoid two conflicting
+# specifications for the same package.
 bambi
-pymc-bart
 seaborn
