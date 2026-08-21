@@ -249,6 +249,11 @@ RANDOM_SEED = 202410
 # [中文版新增检查] 本章没有外部数据依赖；运算图是唯一的生成资产。
 DATA_FILES = ()
 ASSET_DIR = Path("generated")
+# 中文版现代化说明：ASSET_DIR 在隔离构建中每次都从空目录开始（不会带入陈旧的
+# 历史输出），因此确定性回退 PNG不能直接放在 ASSET_DIR 里——必须放在构建器会
+# 完整复制、不会被当成"待清空的生成目录"的 static/ 下，缺少渲染器时再显式拷贝
+# 到 ASSET_DIR，两者用途不冲突。
+STATIC_ASSET_DIR = Path("static")
 EXPECTED_ASSETS = {
     "symbolic_graph_unopt.png",
     "symbolic_graph_opt.png",
@@ -1150,8 +1155,21 @@ def _is_valid_png(path):
     )
 
 
+def _use_static_fallback(asset_path, filename):
+    # 若 ASSET_DIR 里还没有有效 PNG，从 static/ 拷贝确定性回退资产。
+    if _is_valid_png(asset_path):
+        return True
+    fallback_path = STATIC_ASSET_DIR / filename
+    if _is_valid_png(fallback_path):
+        shutil.copy2(fallback_path, asset_path)
+        return True
+    return False
+
+
 def _render_symbolic_asset(graph, filename):
-    # 优先用 pydot/dot 渲染；否则保留经审计的确定性本地回退 PNG。
+    # 优先用 pydot/dot 渲染；否则从 static/ 拷贝经审计的确定性回退 PNG 到
+    # ASSET_DIR（隔离构建中 ASSET_DIR 每次都从空目录开始，回退资产本身
+    # 不能放在 ASSET_DIR 里，否则会被当成陈旧生成输出而不会随源码一起复制）。
     ASSET_DIR.mkdir(parents=True, exist_ok=True)
     asset_path = ASSET_DIR / filename
     renderer_available = (
@@ -1173,13 +1191,13 @@ def _render_symbolic_asset(graph, filename):
             return "pydot/dot"
         except Exception as exc:
             temporary_path.unlink(missing_ok=True)
-            if not _is_valid_png(asset_path):
+            if not _use_static_fallback(asset_path, filename):
                 raise RuntimeError(
                     f"{filename} 渲染失败，且确定性回退资产缺失或无效"
                 ) from exc
             print(f"{filename} 渲染失败，使用确定性回退：{type(exc).__name__}")
             return "deterministic-fallback"
-    if not _is_valid_png(asset_path):
+    if not _use_static_fallback(asset_path, filename):
         raise RuntimeError(
             f"缺少有效资产 {asset_path}；需要 pydot/dot 或本章确定性回退 PNG"
         )
@@ -1198,13 +1216,19 @@ unoptimized_asset_mode = _render_symbolic_asset(
     out_symbolic,
     "symbolic_graph_unopt.png",
 )
-_validate_symbolic_assets()
+# 中文版现代化说明：此处只渲染了 symbolic_graph_unopt.png，
+# symbolic_graph_opt.png 要等下一个代码块（优化后的运算图）才会生成；
+# 因此这里只能校验刚生成的这一个资产，完整两份资产的强制校验放在
+# 下一个代码块末尾（两者都已生成之后）执行，避免在隔离构建中过早断言失败。
+assert _is_valid_png(ASSET_DIR / "symbolic_graph_unopt.png"), (
+    "缺少或无效的必需 PNG：['symbolic_graph_unopt.png']"
+)
 print(f"未经优化的运算图资产：{unoptimized_asset_mode}")
 """,
         "notebooks_updated/chp_10.ipynb:cell-47; markdown/chp_10.md:965-971",
         original_name="fig:unoptimized_symbolic_algebra_graph",
         modernization="输出到本章 generated/；优先使用 pydot/dot，并在缺失或渲染失败时使用经审计的确定性本地回退 PNG",
-        addition="有效 PNG 与完整必需资产集合的强制校验",
+        addition="有效 PNG 的强制校验（完整两份必需资产集合的校验见下一代码块）",
     ),
     md(
         "ch10-unoptimized-caption",
