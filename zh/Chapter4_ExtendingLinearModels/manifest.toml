@@ -1,0 +1,767 @@
+# 第 4 章独立语义清单；本交付不注册到共享 book.toml。
+schema_version = 1
+
+[chapter]
+id = "chapter-04-extending-linear-models-zh"
+title = "第 4 章: 扩展线性模型"
+language = "zh-CN"
+status = "canonical-source"
+canonical_source = "build.py"
+prose_authority = "../../markdown/chp_04.md"
+code_modernization_source = "../../notebooks_updated/chp_04.ipynb"
+source_lines = 1795
+standalone_cwd = "."
+generates_notebook = false
+generates_org = false
+
+[coverage]
+headings = 14
+anchors = 14
+display_math = 12
+labeled_equations = 11
+figures = 30
+tables = 4
+authoritative_code_blocks = 18
+notebook_cells = 140
+notebook_code_cells = 87
+citation_occurrences = 10
+citation_keys = 10
+footnotes = 7
+admonitions = 4
+exercises = 16
+exercise_hints = 0
+
+[dependency_group]
+name = "chapter-04-pymc-tfp"
+python = ">=3.11"
+packages = [
+  "numpy",
+  "pandas",
+  "matplotlib",
+  "scipy",
+  "pymc",
+  "pytensor",
+  "arviz",
+  "tensorflow",
+  "tensorflow-probability",
+  "graphviz",
+]
+validated_local_versions = [
+  "numpy==2.5.2",
+  "pandas==3.0.5",
+  "matplotlib==3.11.1",
+  "pymc==5.28.5",
+  "pytensor==2.38.2",
+  "arviz==0.23.4",
+  "tensorflow==2.21.0",
+  "tensorflow-probability==0.25.0",
+  "graphviz==0.21",
+]
+forbidden_apis = [
+  "az.from_pymc3",
+  "pm.MutableData",
+  "tensorflow_probability.python.internal",
+  "theano",
+]
+
+[execution]
+profile_environment_variable = "CH4_PROFILE"
+default_profile = "smoke"
+profiles = ["smoke", "release"]
+seed = 20210404
+cwd = "."
+data_directory = "data"
+figure_directory = "figures"
+no_skipped_cells = true
+full_mcmc_in_validation = false
+pytensor_c_backend = "auto; pure-Python fallback only when Python.h is absent"
+
+[execution.smoke]
+draws = 20
+tune = 20
+long_draws = 24
+long_tune = 30
+chains = 1
+cores = 1
+tfp_draws = 20
+tfp_adaptation_steps = 20
+tfp_chains = 1
+
+[execution.release]
+draws = 1000
+tune = 1000
+long_draws = 2000
+long_tune = 4000
+chains = 4
+tfp_draws = 1000
+tfp_adaptation_steps = 1000
+tfp_chains = 4
+
+[[headings]]
+order = 1
+level = 1
+anchor = "chap3"
+title = "扩展线性模型"
+source_line = 3
+
+[[headings]]
+order = 2
+level = 2
+anchor = "transforming_covariates"
+title = "变换协变量"
+source_line = 18
+
+[[headings]]
+order = 3
+level = 2
+anchor = "varying-uncertainty"
+title = "变化的不确定性"
+source_line = 165
+
+[[headings]]
+order = 4
+level = 2
+anchor = "interaction-effects"
+title = "交互效应"
+source_line = 238
+
+[[headings]]
+order = 5
+level = 2
+anchor = "robust_regression"
+title = "稳健回归"
+source_line = 371
+
+[[headings]]
+order = 6
+level = 2
+anchor = "multilevel_models"
+title = "合并、多层模型与混合效应"
+source_line = 612
+
+[[headings]]
+order = 7
+level = 3
+anchor = "unpooled-parameters"
+title = "不合并参数"
+source_line = 645
+
+[[headings]]
+order = 8
+level = 3
+anchor = "pooled-parameters"
+title = "合并参数"
+source_line = 757
+
+[[headings]]
+order = 9
+level = 3
+anchor = "mixing-group-and-common-parameters"
+title = "混合组参数与共同参数"
+source_line = 851
+
+[[headings]]
+order = 10
+level = 2
+anchor = "hierarchical-models"
+title = "层级模型"
+source_line = 968
+
+[[headings]]
+order = 11
+level = 3
+anchor = "model_geometry"
+title = "后验几何很重要"
+source_line = 1170
+
+[[headings]]
+order = 12
+level = 3
+anchor = "predictions-at-multiple-levels"
+title = "在多个层级上预测"
+source_line = 1443
+
+[[headings]]
+order = 13
+level = 3
+anchor = "priors-for-multilevel-models"
+title = "多层模型的先验"
+source_line = 1564
+
+[[headings]]
+order = 14
+level = 2
+anchor = "exercises4"
+title = "练习"
+source_line = 1610
+
+[[citations]]
+key = "martin_2018"
+
+[[citations]]
+key = "grubbs_1969"
+
+[[citations]]
+key = "betancourt_2020_worfklow"
+
+[[citations]]
+key = "gelman2005"
+
+[[citations]]
+key = "gabry_goodrich_2020"
+
+[[citations]]
+key = "capretto2020"
+
+[[citations]]
+key = "neal_2003"
+
+[[citations]]
+key = "Papaspiliopoulos2007"
+
+[[citations]]
+key = "betancourt_2020_hierarchical"
+
+[[citations]]
+key = "lemoine_2019"
+
+[[footnotes]]
+id = 1
+source_lines = "1775-1776"
+topic = "残差定义"
+
+[[footnotes]]
+id = 2
+source_lines = "1778-1779"
+topic = "小费玩具数据限制"
+
+[[footnotes]]
+id = 3
+source_lines = "1781-1783"
+topic = "Student-t 均值和尺度"
+
+[[footnotes]]
+id = 4
+source_lines = "1785-1788"
+topic = "Empanada 定义"
+
+[[footnotes]]
+id = 5
+source_lines = "1790-1791"
+topic = "阿根廷节日"
+
+[[footnotes]]
+id = 6
+source_line = 1793
+topic = "位置-尺度分布族"
+
+[[footnotes]]
+id = 7
+source_line = 1795
+topic = "Stan 先验建议"
+
+[[exercises]]
+id = "4E1"
+difficulty = "easy"
+source_lines = "1612-1613"
+has_hint = false
+
+[[exercises]]
+id = "4E2"
+difficulty = "easy"
+source_lines = "1615-1640"
+has_hint = false
+
+[[exercises]]
+id = "4E3"
+difficulty = "easy"
+source_lines = "1642-1643"
+has_hint = false
+
+[[exercises]]
+id = "4E4"
+difficulty = "easy"
+source_lines = "1645-1650"
+has_hint = false
+
+[[exercises]]
+id = "4E5"
+difficulty = "easy"
+source_lines = "1652-1657"
+has_hint = false
+
+[[exercises]]
+id = "4E6"
+difficulty = "easy"
+source_lines = "1659-1670"
+has_hint = false
+
+[[exercises]]
+id = "4E7"
+difficulty = "easy"
+source_lines = "1672-1674"
+has_hint = false
+
+[[exercises]]
+id = "4E8"
+difficulty = "easy"
+source_lines = "1676-1679"
+has_hint = false
+data = "../../data/penguins.csv"
+
+[[exercises]]
+id = "4M9"
+difficulty = "medium"
+source_lines = "1681-1685"
+has_hint = false
+data_status = "missing-from-repository-outside-solutions"
+
+[[exercises]]
+id = "4M10"
+difficulty = "medium"
+source_lines = "1687-1692"
+has_hint = false
+data = "../../data/penguins.csv"
+
+[[exercises]]
+id = "4M11"
+difficulty = "medium"
+source_lines = "1694-1701"
+has_hint = false
+data = "../../exercises/data/concrete.csv"
+
+[[exercises]]
+id = "4M12"
+difficulty = "medium"
+source_lines = "1703-1704"
+has_hint = false
+
+[[exercises]]
+id = "4H13"
+difficulty = "hard"
+source_lines = "1706-1721"
+has_hint = false
+data = "../../exercises/data/radon.csv"
+
+[[exercises]]
+id = "4H14"
+difficulty = "hard"
+source_lines = "1723-1741"
+has_hint = false
+data_status = "synthetic-data-created-by-learner"
+
+[[exercises]]
+id = "4H15"
+difficulty = "hard"
+source_lines = "1743-1748"
+has_hint = false
+
+[[exercises]]
+id = "4H16"
+difficulty = "hard"
+source_lines = "1750-1773"
+has_hint = false
+data_status = "missing-from-repository-outside-solutions"
+
+[[equations]]
+label = "eq:covariate_transformation_regression"
+
+[[equations]]
+label = "eq:varying_variance"
+
+[[equations]]
+label = "eq:interaction_effect"
+
+[[equations]]
+label = "eq:unpooled_regression"
+
+[[equations]]
+label = "eq:pooled_regression"
+
+[[equations]]
+label = "eq:multilevel_regression"
+
+[[equations]]
+label = "eq:hierarchical_regression"
+
+[[equations]]
+label = "eq:centered_hierarchical_regression"
+
+[[equations]]
+label = "eq:noncentered_hierarchical_regression"
+
+[[equations]]
+label = "eq:ecology_regression"
+
+[[equations]]
+label = "eq:physics_experiment"
+
+[[equations]]
+label = "exercise-4E2-unlabeled-regression"
+source_label = "none"
+
+[[tables]]
+label = "tab:non_robust_regression"
+
+[[tables]]
+label = "tab:robust_regression"
+
+[[tables]]
+label = "tab:unpooled_sales"
+
+[[tables]]
+label = "tab:Hierarchical_sales"
+
+[[figures]]
+order = 1
+label = "fig:Baby_Length_Scatter"
+path = "figures/baby_length_scatter.png"
+producer = "ch04-figure-baby-length-scatter"
+mode = "generated"
+
+[[figures]]
+order = 2
+label = "fig:Baby_Length_Linear"
+path = "figures/baby_length_linear_fit.png"
+producer = "ch04-figure-baby-linear-and-loo"
+mode = "generated"
+
+[[figures]]
+order = 3
+label = "fig:Baby_Length_non_linear"
+path = "figures/baby_length_sqrt_fit.png"
+producer = "ch04-figure-baby-square-root-and-compare"
+mode = "generated"
+
+[[figures]]
+order = 4
+label = "fig:Baby_Length_Sqrt_VV_Fit_Include_Error"
+path = "figures/baby_length_sqrt_vv_fit_include_error.png"
+producer = "ch04-figure-baby-varying-uncertainty"
+mode = "generated"
+
+[[figures]]
+order = 5
+label = "fig:Smoker_Tip_Interaction"
+path = "figures/smoker_tip_interaction.png"
+producer = "ch04-figure-tip-interaction"
+mode = "generated"
+
+[[figures]]
+order = 6
+label = "fig:StudentT_Normal_Comparison"
+path = "figures/studentt_normal_comparison.png"
+producer = "ch04-figure-student-t-normal-comparison"
+mode = "generated"
+
+[[figures]]
+order = 7
+label = "fig:Empanada_Scatter_Plot"
+path = "figures/empanada_scatter_plot.png"
+producer = "ch04-generate-empanada-sales"
+mode = "generated"
+
+[[figures]]
+order = 8
+label = "fig:Empanada_Scatter_Non_Robust"
+path = "figures/empanada_scatter_non_robust.png"
+producer = "ch04-figure-empanada-non-robust"
+mode = "generated"
+
+[[figures]]
+order = 9
+label = "fig:Empanada_Scatter_Robust"
+path = "figures/empanada_scatter_robust.png"
+producer = "ch04-figure-empanada-robust-and-compare"
+mode = "generated"
+
+[[figures]]
+order = 10
+label = "fig:Restaurant_Order_Scatter"
+path = "figures/restaurant_order_scatter.png"
+producer = "ch04-generate-restaurant-sales-data"
+mode = "generated"
+
+[[figures]]
+order = 11
+label = "fig:unpooled_model"
+path = "figures/unpooled_model.png"
+mode = "copied-static"
+source = "../../markdown/figures/unpooled_model.png"
+sha256 = "6de00a82dde480fcb4388ca9aa45fa40706509b5da4cbaa06689cbbd40c6511a"
+
+[[figures]]
+order = 12
+label = "fig:Salad_Sales_Basic_Regression_Model_Unpooled"
+path = "figures/salad_sales_basic_regression_model_unpooled.png"
+producer = "ch04-model-sales-unpooled"
+mode = "graphviz-dot-fallback"
+dot_path = "figures/salad_sales_basic_regression_model_unpooled.dot"
+
+[[figures]]
+order = 13
+label = "fig:Salad_Sales_Basic_Regression_ForestPlot_beta"
+path = "figures/salad_sales_basic_regression_forestplot_beta.png"
+producer = "ch04-figures-sales-unpooled-forest"
+mode = "generated"
+
+[[figures]]
+order = 14
+label = "fig:Salad_Sales_Basic_Regression_ForestPlot_sigma"
+path = "figures/salad_sales_basic_regression_forestplot_sigma.png"
+producer = "ch04-figures-sales-unpooled-forest"
+mode = "generated"
+
+[[figures]]
+order = 15
+label = "fig:pooled_model"
+path = "figures/pooled_model.png"
+mode = "copied-static"
+source = "../../markdown/figures/pooled_model.png"
+sha256 = "1894df666f666192e197d98e6827557254621fd6e37b38366dbf06432ebf3299"
+
+[[figures]]
+order = 16
+label = "fig:Salad_Sales_Basic_Regression_Model_Pooled"
+path = "figures/salad_sales_basic_regression_model_pooled.png"
+producer = "ch04-model-sales-pooled"
+mode = "graphviz-dot-fallback"
+dot_path = "figures/salad_sales_basic_regression_model_pooled.dot"
+
+[[figures]]
+order = 17
+label = "fig:Salad_Sales_Basic_Regression_ForestPlot_Sigma_Comparison"
+path = "figures/salad_sales_basic_regression_forestplot_sigma_comparison.png"
+producer = "ch04-figures-sales-pooled-comparison"
+mode = "generated"
+
+[[figures]]
+order = 18
+label = "fig:Salad_Sales_Basic_Regression_Scatter_Pooled"
+path = "figures/salad_sales_basic_regression_scatter_pooled.png"
+producer = "ch04-figures-sales-pooled-comparison"
+mode = "generated"
+
+[[figures]]
+order = 19
+label = "fig:Salad_Sales_Basic_Regression_Model_Multilevel"
+path = "figures/salad_sales_basic_regression_model_multilevel.png"
+producer = "ch04-model-sales-mixed-common-sigma"
+mode = "graphviz-dot-fallback"
+dot_path = "figures/salad_sales_basic_regression_model_multilevel.dot"
+
+[[figures]]
+order = 20
+label = "fig:Salad_Sales_Basic_Regression_Scatter_Sigma_Pooled_Slope_Unpooled"
+path = "figures/salad_sales_basic_regression_scatter_sigma_pooled_slope_unpooled.png"
+producer = "ch04-figures-sales-mixed-common-sigma"
+mode = "generated"
+
+[[figures]]
+order = 21
+label = "fig:Salad_Sales_ForestPlot_Sigma_Unpooled_Multilevel_Comparison"
+path = "figures/salad_sales_forestplot_sigma_unpooled_multilevel_comparison.png"
+producer = "ch04-figures-sales-mixed-common-sigma"
+mode = "generated"
+
+[[figures]]
+order = 22
+label = "fig:partial_pooled_model"
+path = "figures/partial_pooled_model.png"
+mode = "copied-static"
+source = "../../markdown/figures/partial_pooled_model.png"
+sha256 = "eb5fa52b5c1a1c4fc682c9d181b3e294b14d039c41e10e001d5f25d28b75d845"
+
+[[figures]]
+order = 23
+label = "fig:Salad_Sales_Hierarchial_Regression_Model"
+path = "figures/salad_sales_hierarchial_regression_model.png"
+producer = "ch04-model-sales-hierarchical"
+mode = "graphviz-dot-fallback"
+dot_path = "figures/salad_sales_hierarchial_regression_model.dot"
+
+[[figures]]
+order = 24
+label = "fig:Salad_Sales_ForestPlot_Sigma_Hierarchical"
+path = "figures/salad_sales_forestplot_sigma_hierarchical.png"
+producer = "ch04-diagnostics-sales-hierarchical"
+mode = "generated"
+
+[[figures]]
+order = 25
+label = "fig:Neals_Funnel"
+path = "figures/neals_funnel.png"
+producer = "ch04-figure-neals-funnel-and-hierarchical-data"
+mode = "generated"
+
+[[figures]]
+order = 26
+label = "fig:Multiple_Salad_Sales_Scatter"
+path = "figures/multiple_salad_sales_scatter.png"
+producer = "ch04-figure-neals-funnel-and-hierarchical-data"
+mode = "generated"
+
+[[figures]]
+order = 27
+label = "fig:Neals_Funnel_Salad_Centered"
+path = "figures/neals_funnel_salad_centered.png"
+producer = "ch04-figure-centered-posterior-geometry"
+mode = "generated"
+
+[[figures]]
+order = 28
+label = "fig:Neals_Funnel_Salad_NonCentered"
+path = "figures/neals_funnel_salad_noncentered.png"
+producer = "ch04-figures-noncentered-geometry-comparison"
+mode = "generated"
+
+[[figures]]
+order = 29
+label = "fig:Salad_Sales_Hierarchical_Comparison"
+path = "figures/salad_sales_hierarchical_comparison.png"
+producer = "ch04-figures-noncentered-geometry-comparison"
+mode = "generated"
+
+[[figures]]
+order = 30
+label = "fig:Salad_Sales_Hierarchical_Predictions"
+path = "figures/salad_sales_hierarchical_predictions.png"
+producer = "ch04-existing-location-and-group-predictions"
+mode = "generated"
+
+[[data]]
+id = "babies"
+path = "data/babies.csv"
+source = "../../data/babies.csv"
+usage = "chapter-runtime"
+copied = true
+rows = 800
+columns = ["Month", "Length"]
+sha256 = "b4eedcd3efce2fe8a62e789313055aa1cfba516094d5e2d9fa27413b55805dc6"
+
+[[data]]
+id = "tips"
+path = "data/tips.csv"
+source = "../../data/tips.csv"
+usage = "chapter-runtime"
+copied = true
+rows = 244
+columns = ["total_bill", "tip", "sex", "smoker", "day", "time", "size"]
+sha256 = "22415aaf1e56e675b9a0983cb0d321697dad51f6060a44fb8ecaad7a00de9a09"
+
+[[data]]
+id = "penguins"
+path = "../../data/penguins.csv"
+usage = "exercises-4E8-4M10"
+copied = false
+status = "available"
+sha256 = "f204db2c753b0937caac3cb35258562c14f073e4bbc76be24b4c51ce22767a93"
+
+[[data]]
+id = "concrete"
+path = "../../exercises/data/concrete.csv"
+usage = "exercise-4M11"
+copied = false
+status = "available"
+sha256 = "f062a33cf4621eae91a0d095b33cf504c4a7ea3c13ac82d35f2aba3a186a8ad0"
+
+[[data]]
+id = "radon"
+path = "../../exercises/data/radon.csv"
+usage = "exercise-4H13"
+copied = false
+status = "available"
+sha256 = "4101a87aa11d161b2eb85cb65bdc8a09cb3eddadbd4d34078a4e0329b3df8c77"
+
+[[data]]
+id = "anscombe-quartet"
+usage = "exercise-4M9"
+copied = false
+status = "missing-from-repository-outside-solutions"
+
+[[data]]
+id = "gravity-measurements"
+expected_filename = "gravity_measurements.csv"
+usage = "exercise-4H16"
+copied = false
+status = "missing-from-repository-outside-solutions"
+
+[[limitations]]
+id = "graphviz-dot-binary"
+status = "environment-limitation"
+detail = "graphviz Python 包可用，但系统 dot 可执行文件缺失；4 个模型图单元始终写出公开 Graphviz DOT 源，不跳过单元。"
+
+[[limitations]]
+id = "exercise-4M9-data"
+status = "source-data-missing"
+detail = "在未检查 solutions 的前提下，仓库中没有找到练习声明的 Anscombe 数据。"
+
+[[limitations]]
+id = "exercise-4H16-data"
+status = "source-data-missing"
+detail = "在未检查 solutions 的前提下，仓库中没有找到 gravity_measurements.csv。"
+
+[[limitations]]
+id = "palette-validator-runtime"
+status = "validation-environment-limitation"
+detail = "环境无 node/bun/deno/qjs/js，无法运行 dataviz JavaScript 调色板验证器；代码使用技能文档中已验证的固定色板，并以线型、点型和图例提供次级编码。"
+
+[[semantic_checks]]
+id = "cell-schema"
+expectation = "每个单元仅含 type/source/id/metadata，且 metadata 含 kind 和 provenance。"
+
+[[semantic_checks]]
+id = "stable-unique-cell-ids"
+expectation = "全部单元 ID 非空且唯一。"
+
+[[semantic_checks]]
+id = "complete-anchor-inventory"
+expectation = "14 个源锚点全部出现在单元元数据中。"
+
+[[semantic_checks]]
+id = "complete-code-label-inventory"
+expectation = "18 个权威代码块标签全部出现在单元元数据中。"
+
+[[semantic_checks]]
+id = "complete-citation-inventory"
+expectation = "10 个引用键全部保留且与 bibtex.bib 一致。"
+
+[[semantic_checks]]
+id = "complete-figure-inventory"
+expectation = "30 个 figure 标签全部出现在 Markdown 和本清单中。"
+
+[[semantic_checks]]
+id = "complete-table-inventory"
+expectation = "4 个 table 标签全部保留。"
+
+[[semantic_checks]]
+id = "complete-equation-inventory"
+expectation = "12 个展示公式全部保留，包括 11 个具名公式和练习 4E2 的无标签公式。"
+
+[[semantic_checks]]
+id = "complete-footnote-inventory"
+expectation = "7 条脚注定义全部保留。"
+
+[[semantic_checks]]
+id = "complete-exercise-inventory"
+expectation = "4E1-4E8、4M9-4M12、4H13-4H16 全部保留；源文件未提供提示。"
+
+[[semantic_checks]]
+id = "public-current-apis"
+expectation = "不出现私有 TFP API、az.from_pymc3、pm.MutableData、Theano 或 IPython magic。"
+
+[[semantic_checks]]
+id = "chapter-relative-runtime-paths"
+expectation = "可执行章节代码仅使用 data/ 与 figures/ 相对路径。"
+
+[[semantic_checks]]
+id = "deterministic-profiles"
+expectation = "smoke/release 均有显式种子；smoke 降低抽样预算但不跳过单元。"
+
+[[semantic_checks]]
+id = "static-python-compilation"
+expectation = "build.py 及每个代码单元均可用 compile(..., mode='exec') 编译。"
+
+[[semantic_checks]]
+id = "lightweight-model-construction"
+expectation = "验证仅构造代表性 PyMC/TFP 模型并检查 logp/event shape，不执行完整 MCMC。"

@@ -1,0 +1,60 @@
+# 第 10 章的独立构建清单；注册到全书清单不属于本目录交付范围。
+schema_version = 1
+
+[unit]
+id = "chapter-10"
+title = "第十章：概率编程语言"
+status = "available"
+builder = "Chapter10_PPL/build.py"
+environment = "ppl"
+
+[notebook]
+file = "Ch10_PPL_zh.ipynb"
+org_file = "Ch10_PPL_zh.org"
+
+[execution]
+cwd = "Chapter10_PPL"
+kernel = "python3"
+timeout = 1800
+allow_errors = false
+
+[assets]
+directory = "generated"
+chapter_relative = true
+required = [
+  "symbolic_graph_unopt.png",
+  "symbolic_graph_opt.png",
+]
+generated_or_deterministic_fallback = true
+missing_is_error = true
+png_signature_validation = true
+fallback_sources = [
+  "../../markdown/figures/symbolic_graph_unopt.png",
+  "../../markdown/figures/symbolic_graph_opt.png",
+]
+
+[assets.fallback_sha256]
+"symbolic_graph_unopt.png" = "0d4edf7e248e1e95183d714e5d5e69f6dd91bef12c88146be9dc8275581f63ba"
+"symbolic_graph_opt.png" = "b18d00d2c0a9be3b3cf109330ccc5337fb164c142af45b7f35e96966b66ffa28"
+
+[dependencies]
+group = "ppl"
+packages = [
+  "numpy",
+  "scipy",
+  "pymc",
+  "pytensor",
+  "jax",
+  "tensorflow",
+  "tensorflow-probability",
+  "numpyro",
+  "pydot",
+]
+system_executables = ["dot"]
+asset_rendering_fallback_available = true
+
+[inventory]
+image_references = 2
+equation_labels = 8
+equation_references = 5
+source_block_names = 40

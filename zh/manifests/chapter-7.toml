@@ -1,0 +1,21 @@
+schema_version = 1
+
+[unit]
+id = "chapter-7"
+title = "第七章：贝叶斯加性回归树"
+status = "available"
+builder = "Chapter7_BART/build.py"
+environment = ["pymc", "bart"]
+
+[notebook]
+file = "Ch7_BART_zh.ipynb"
+org_file = "Ch7_BART_zh.org"
+
+[execution]
+cwd = "Chapter7_BART"
+kernel = "python3"
+timeout = 3600
+allow_errors = false
+
+[assets]
+directory = "generated"

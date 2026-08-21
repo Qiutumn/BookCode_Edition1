@@ -1,0 +1,6 @@
+# Chapter 10 JAX/NumPyro extension compatible with TensorFlow Probability 0.25.
+# TFP 0.25's JAX substrate was tested against JAX 0.4.35; keep this bounded
+# rather than resolving to newer JAX releases that removed APIs TFP 0.25 uses.
+jax>=0.4.35,<0.5.0
+jaxlib>=0.4.35,<0.5.0
+numpyro>=0.17.0,<0.18.0

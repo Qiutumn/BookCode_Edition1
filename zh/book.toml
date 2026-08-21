@@ -1,0 +1,222 @@
+schema_version = 1
+
+[book]
+title = "Python 贝叶斯建模与计算：中文版"
+language = "zh-CN"
+source_license = "CC-BY-NC-SA-4.0"
+code_license = "GPL-2.0"
+
+# Static generation covers every canonical builder and never imports a builder
+# from the live chapter directory. Execution profiles stay intentionally smaller
+# until their optional stacks and full numerical runs are verified.
+[profiles.static]
+execute = false
+timeout = 120
+allow_errors = false
+units = [
+  "dedication", "foreword", "preface", "symbol-list",
+  "chapter-1", "chapter-2", "chapter-3", "chapter-4", "chapter-5",
+  "chapter-6", "chapter-7", "chapter-8", "chapter-9", "chapter-10",
+  "chapter-11", "glossary", "references",
+]
+environment = "core"
+
+[profiles.smoke]
+execute = true
+timeout = 300
+allow_errors = false
+units = ["chapter-1", "chapter-2", "chapter-3", "chapter-9"]
+environment = "pymc"
+
+[profiles.release]
+execute = true
+timeout = 1200
+allow_errors = false
+units = ["chapter-1", "chapter-2", "chapter-3", "chapter-9"]
+environment = "pymc"
+
+# A landing/welcome unit is reserved for a future generated index. It has no
+# canonical builder yet and is therefore explicitly planned rather than silently
+# omitted from the edition order.
+[[units]]
+id = "welcome"
+order = 10
+kind = "front"
+title = "欢迎"
+status = "planned"
+required = false
+
+[[units]]
+id = "dedication"
+order = 20
+kind = "front"
+title = "献词"
+status = "available"
+path = "FrontMatter/Dedication"
+builder = "FrontMatter/Dedication/build.py"
+notebook = "Dedication_zh.ipynb"
+org = "Dedication_zh.org"
+assets_dir = "generated"
+environment = "core"
+required = true
+
+[[units]]
+id = "foreword"
+order = 30
+kind = "front"
+title = "序言"
+status = "available"
+path = "FrontMatter/Foreword"
+builder = "FrontMatter/Foreword/build.py"
+notebook = "Foreword_zh.ipynb"
+org = "Foreword_zh.org"
+assets_dir = "generated"
+environment = "core"
+required = true
+
+[[units]]
+id = "preface"
+order = 40
+kind = "front"
+title = "前言"
+status = "available"
+path = "FrontMatter/Preface"
+builder = "FrontMatter/Preface/build.py"
+notebook = "Preface_zh.ipynb"
+org = "Preface_zh.org"
+assets_dir = "generated"
+environment = ["pymc", "tfp", "optional-modeling"]
+required = true
+
+[[units]]
+id = "symbol-list"
+order = 50
+kind = "front"
+title = "符号表"
+status = "available"
+path = "FrontMatter/SymbolList"
+builder = "FrontMatter/SymbolList/build.py"
+notebook = "SymbolList_zh.ipynb"
+org = "SymbolList_zh.org"
+assets_dir = "generated"
+environment = "core"
+required = true
+
+[[units]]
+id = "chapter-1"
+order = 100
+kind = "chapter"
+title = "第一章：贝叶斯推断"
+status = "available"
+path = "Chapter1_BayesianInference"
+builder = "Chapter1_BayesianInference/build.py"
+notebook = "Ch1_BayesianInference_zh.ipynb"
+org = "Ch1_BayesianInference_zh.org"
+assets_dir = "generated"
+environment = "pymc"
+required = true
+
+[[units]]
+id = "chapter-2"
+order = 200
+kind = "chapter"
+title = "第二章：贝叶斯模型的探索性分析"
+status = "available"
+path = "Chapter2_ExploratoryAnalysis"
+builder = "Chapter2_ExploratoryAnalysis/build.py"
+notebook = "Ch2_ExploratoryAnalysis_zh.ipynb"
+org = "Ch2_ExploratoryAnalysis_zh.org"
+assets_dir = "generated"
+environment = "pymc"
+required = true
+
+[[units]]
+id = "chapter-3"
+order = 300
+kind = "chapter"
+manifest = "manifests/chapter-3.toml"
+required = true
+
+[[units]]
+id = "chapter-4"
+order = 400
+kind = "chapter"
+manifest = "manifests/chapter-4.toml"
+required = true
+
+[[units]]
+id = "chapter-5"
+order = 500
+kind = "chapter"
+manifest = "manifests/chapter-5.toml"
+required = true
+
+[[units]]
+id = "chapter-6"
+order = 600
+kind = "chapter"
+manifest = "manifests/chapter-6.toml"
+required = true
+
+[[units]]
+id = "chapter-7"
+order = 700
+kind = "chapter"
+manifest = "manifests/chapter-7.toml"
+required = true
+
+[[units]]
+id = "chapter-8"
+order = 800
+kind = "chapter"
+manifest = "manifests/chapter-8.toml"
+required = true
+
+[[units]]
+id = "chapter-9"
+order = 900
+kind = "chapter"
+manifest = "manifests/chapter-9.toml"
+required = true
+
+[[units]]
+id = "chapter-10"
+order = 1000
+kind = "chapter"
+manifest = "manifests/chapter-10.toml"
+required = true
+
+[[units]]
+id = "chapter-11"
+order = 1100
+kind = "chapter"
+manifest = "manifests/chapter-11.toml"
+required = true
+
+[[units]]
+id = "glossary"
+order = 1200
+kind = "back"
+title = "术语表"
+status = "available"
+path = "BackMatter"
+builder = "BackMatter/glossary_build.py"
+notebook = "Glossary_zh.ipynb"
+org = "Glossary_zh.org"
+assets_dir = "glossary-generated"
+environment = "core"
+required = true
+
+[[units]]
+id = "references"
+order = 1300
+kind = "back"
+title = "参考文献"
+status = "available"
+path = "BackMatter"
+builder = "BackMatter/references_build.py"
+notebook = "References_zh.ipynb"
+org = "References_zh.org"
+assets_dir = "references-generated"
+environment = "core"
+required = true

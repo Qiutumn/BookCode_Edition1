@@ -1,0 +1,7 @@
+# UNRESOLVED OPTIONAL STACK.
+# JAX, jaxlib, and NumPyro were not installed in the verified environment.
+# Resolve compatible versions on the target CPU/GPU platform before enabling
+# or releasing a unit that declares this environment.
+jax
+jaxlib
+numpyro

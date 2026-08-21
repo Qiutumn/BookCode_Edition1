@@ -1,0 +1,33 @@
+# 第 7 章规范清单；严格遵循 zh/tools/build_book.py 的 schema_version = 1。
+# 权威正文: markdown/chp_07.md
+# sha256: 51e768e66549844e2508939c6e8222bfb82cd2fe0f252b1ca296347dc59ba24e
+# 代码起点: notebooks_updated/chp_07.ipynb
+# sha256: cbc8f4250cbd2330675bc3fb08a04669a4539c324850f0454c17c9069fb6f207
+# 运行时兼容目标: Python 3.12, PyMC 5.28.x, ArviZ 0.23.x,
+# pymc-bart >= 0.11.0, < 0.12.0（另需 arviz-stats[xarray] >= 0.6.0）。
+# 数据、图像、锚点、公式、引文、脚注、习题及代码语义清单由 build.py 校验；
+# 核心 manifest 解析器会拒绝自定义 expectations/hashes 字段，故不在此扩展模式。
+# 当前共享编排器不会导出执行配置名；默认采用 smoke 预算。发布执行须显式设置
+# BMCP_EXECUTION_PROFILE=release，此限制因本任务禁止修改共享工具而保留并在报告中列明。
+
+schema_version = 1
+
+[unit]
+id = "chapter-7"
+title = "第 7 章：贝叶斯加性回归树"
+status = "available"
+builder = "Chapter7_BART/build.py"
+environment = "bart"
+
+[notebook]
+file = "Ch7_BART_zh.ipynb"
+org_file = "Ch7_BART_zh.org"
+
+[execution]
+cwd = "Chapter7_BART"
+kernel = "python3"
+timeout = 3600
+allow_errors = false
+
+[assets]
+directory = "generated"

@@ -1,0 +1,27 @@
+schema_version = 1
+
+[unit]
+id = "frontmatter-symbol-list"
+title = "符号表"
+source = "markdown/symbollist.md"
+builder = "zh/FrontMatter/SymbolList/build.py"
+
+[outputs]
+notebook = "SymbolList_zh.ipynb"
+org = "SymbolList_zh.org"
+
+[expectations]
+source_headings = ["# Symbols"]
+translated_headings = ["# 符号表"]
+citation_keys = []
+footnote_ids = []
+anchors = ["symbols"]
+symbol_entries = 40
+code_cells = 0
+
+[notes]
+source_ambiguities = [
+  "T(nu, mu, sigma) calls nu a grade of normality and then identifies it as degrees of freedom.",
+  "Half-Student-t notation is written as H T(nu sigma) without a comma.",
+  "Cauchy(alpha, beta) says location parameters in the plural although only alpha is the location parameter."
+]

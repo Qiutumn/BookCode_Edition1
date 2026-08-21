@@ -1,0 +1,11 @@
+# Verified top-level lock input, Python 3.12.3, 2026-08-20.
+# Install after core.lock.txt and run `python -m pip check`.
+numpy==2.5.2
+scipy==1.18.0
+pandas==3.0.5
+matplotlib==3.11.1
+arviz==0.23.4
+pymc==5.28.5
+xarray==2026.7.0
+statsmodels==0.14.6
+graphviz==0.21

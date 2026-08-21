@@ -1,6 +1,10 @@
 r"""构建第一章中文版 (.ipynb + .org)。运行方式见本文件末尾。"""
+import hashlib
+import json
 import os
+import re
 import sys
+from pathlib import Path
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "tools"))
 import nb_tools
@@ -9,21 +13,22 @@ HERE = os.path.dirname(__file__)
 
 cells = [
     {"type": "markdown", "source": r"""
-# 用 Python 做贝叶斯建模与计算 —— 中文·现代库版
+**《用 Python 做贝叶斯建模与计算》中文·现代库版**
 
 `原著: Osvaldo A. Martin, Ravin Kumar, Junpeng Lao`
 
 `书名: Bayesian Modeling and Computation in Python (Chapman & Hall/CRC, 2021), ISBN 978-0-367-89436-8`
 
-`中文翻译、库版本现代化 (PyMC 5 / ArviZ / TensorFlow Probability / NumPyro) 与内容增补: 本 fork 维护者`
+`中文翻译、库版本现代化与内容增补: Qiutumn 及本 fork 的贡献者`
 
 ___
 
 本仓库 fork 自 [BayesianModelingandComputationInPython/BookCode_Edition1](https://github.com/BayesianModelingandComputationInPython/BookCode_Edition1)。
-原仓库 README 明确写道:"This repository contains the open-access version of the
-text and the code examples in the book",并以 **GPL-2.0** 协议开源全部文字与代码,
-因此本翻译在保留原许可证、保留作者署名与引用信息的前提下进行。如果本书内容对你的工作
-有帮助,请按照原仓库 README 中的 BibTeX 引用原书:
+根据原仓库 `welcome.md` 的许可说明,书籍正文采用
+[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/),代码(包括代码块与
+Jupyter Notebook)采用 [GPL-2.0](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)。
+本中文版包含翻译、API 现代化和明确标注的补充内容;相应的正文与代码部分沿用原仓库声明的许可
+划分,这里不对组合文档作超出原仓库文字的法律解释。如果本书内容对你的工作有帮助,请引用原书:
 
 ```
 @book{BMCP2021,
@@ -56,6 +61,7 @@ text and the code examples in the book",并以 **GPL-2.0** 协议开源全部文
 是一致的。
 """},
     {"type": "markdown", "source": r"""
+(chap1)=
 # 第 1 章 贝叶斯推断
 ***
 
@@ -69,6 +75,7 @@ text and the code examples in the book",并以 **GPL-2.0** 协议开源全部文
 这些概念与方法,其中很多会在全书后续章节中被进一步展开和拓展。
 """},
     {"type": "markdown", "source": r"""
+(bayesian_modeling)=
 ## 贝叶斯建模
 
 一个概念模型(conceptual model)是对某个系统的表征,它由一系列概念组合而成,用来帮助
@@ -94,6 +101,7 @@ text and the code examples in the book",并以 **GPL-2.0** 协议开源全部文
 没有用一样。同样地,现代贝叶斯实践者也有很多种方式来表达自己的想法、生成结果、分享输出,
 从而让实践者及其同行都能获得更广泛的正面成果。
 
+(bayesian-models)=
 ### 贝叶斯模型
 
 不论是不是通过计算实现的,贝叶斯模型都有两个决定性特征:
@@ -238,6 +246,8 @@ $$
 > 多多益善!
 """},
     {"type": "code", "source": r"""%matplotlib inline
+import os
+
 import arviz as az
 import matplotlib.pyplot as plt
 import numpy as np
@@ -245,6 +255,15 @@ import pymc as pm
 from scipy import stats
 from scipy.stats import entropy
 from scipy.optimize import minimize
+
+EXECUTION_PROFILE = os.environ.get("BMCP_EXECUTION_PROFILE", "release").lower()
+if EXECUTION_PROFILE not in {"smoke", "release"}:
+    raise ValueError("BMCP_EXECUTION_PROFILE 必须是 smoke 或 release")
+if EXECUTION_PROFILE == "smoke":
+    DRAWS, TUNE, CHAINS, PREDICTIVE_SAMPLES = 100, 100, 2, 200
+else:
+    DRAWS, TUNE, CHAINS, PREDICTIVE_SAMPLES = 1000, 1000, 4, 1000
+RANDOM_SEED = 521
 """},
     {"type": "code", "source": r"""# 全书统一使用黑白灰(grayscale)绘图风格,与纸质书的印刷效果保持一致
 az.style.use("arviz-grayscale")
@@ -464,7 +483,9 @@ with pm.Model() as model:
     # 从后验分布中采样
     # 注意:PyMC 5.x 起 pm.sample() 默认直接返回 arviz.InferenceData,
     # 不再需要像 PyMC3 时代那样显式传入 return_inferencedata=True
-    idata = pm.sample(1000)
+    idata = pm.sample(
+        draws=DRAWS, tune=TUNE, chains=CHAINS, cores=1,
+        random_seed=RANDOM_SEED)
 """},
     {"type": "markdown", "source": r"""
 你可以自己验证一下,这段代码给出的结果,和我们前面手写的 DIY 采样器基本一致,但省力得多。
@@ -473,11 +494,20 @@ with pm.Model() as model:
 由于我们已经用 PyMC 语法定义好了模型,还可以用 `pm.model_to_graphviz(model)` 来生成模型
 的图形化表示:
 """},
-    {"type": "code", "source": r"""graphviz = pm.model_to_graphviz(model)
-graphviz
+    {"type": "code", "source": r"""import shutil
+
+graphviz = pm.model_to_graphviz(model)
+if shutil.which("dot"):
+    display(graphviz)
+else:
+    print("未找到 Graphviz 的 dot 可执行文件;以下显示等价的 DOT 源码:\n")
+    print(graphviz.source)
 """},
     {"type": "code", "source": r"""graphviz.graph_attr.update(dpi="300")
-graphviz.render("img/chp01/BetaBinomModelGraphViz", format="png")
+if shutil.which("dot"):
+    graphviz.render("img/chp01/BetaBinomModelGraphViz", format="png")
+else:
+    print("跳过 PNG 渲染:系统未安装 Graphviz 的 dot 可执行文件。")
 """},
     {"type": "markdown", "source": r"""
 图中的椭圆分别代表我们的先验和似然,而 20 则表示观测数据的个数。
@@ -501,8 +531,14 @@ graphviz.render("img/chp01/BetaBinomModelGraphViz", format="png")
 和后验采样结果 `idata`——这反映了一个事实:先验预测分布只需要模型本身就能算出来,而后验
 预测分布则需要模型加上后验。生成的先验/后验预测分布样本,分别对应下图的第一和第三个子图。
 """},
-    {"type": "code", "source": r"""pred_dists = (pm.sample_prior_predictive(1000, model).prior_predictive["y_obs"].values,
-              pm.sample_posterior_predictive(idata, model).posterior_predictive["y_obs"].values)
+    {"type": "code", "source": r"""pred_dists = (
+    pm.sample_prior_predictive(
+        PREDICTIVE_SAMPLES, model, random_seed=RANDOM_SEED
+    ).prior_predictive["y_obs"].values,
+    pm.sample_posterior_predictive(
+        idata, model, random_seed=RANDOM_SEED
+    ).posterior_predictive["y_obs"].values,
+)
 """},
     {"type": "markdown", "source": r"""
 后验、先验预测和后验预测分布这三个公式,清楚地把后验、先验预测分布、后验预测分布定义为
@@ -1154,6 +1190,46 @@ $\theta$,并且 $n$ 的先验是 $\text{Pois}(4.5)$。
     有用的直觉,并会随着阅读本书的深入而不断被细化。
 """},
 ]
+
+
+def _attach_canonical_metadata(authored_cells):
+    """Add stable IDs and direct provenance metadata to legacy-authored cells."""
+    used_ids = set()
+    for cell in authored_cells:
+        source = cell["source"]
+        digest = hashlib.sha256(
+            f"{cell['type']}\0{source}".encode("utf-8")
+        ).hexdigest()[:16]
+        base_id = f"ch01-{'md' if cell['type'] == 'markdown' else 'code'}-{digest}"
+        cell_id = base_id
+        occurrence = 2
+        while cell_id in used_ids:
+            cell_id = f"{base_id}-{occurrence}"
+            occurrence += 1
+        used_ids.add(cell_id)
+        cell["id"] = cell_id
+
+        if "中文版补充" in source or "中文版新增" in source:
+            kind = "addition"
+        elif cell["type"] == "code" or "中文版现代化说明" in source:
+            kind = "modernization"
+        else:
+            kind = "translation"
+        authority = (
+            "notebooks_updated/chp_01.ipynb"
+            if cell["type"] == "code"
+            else "markdown/chp_01.md"
+        )
+        provenance = [authority]
+        if kind != "translation":
+            provenance.append("zh/Chapter1_BayesianInference/build.py")
+        metadata = cell.setdefault("metadata", {})
+        metadata.setdefault("kind", kind)
+        metadata.setdefault("provenance", provenance)
+
+
+_attach_canonical_metadata(cells)
+
 
 if __name__ == "__main__":
     ipynb_path = os.path.join(HERE, "Ch1_BayesianInference_zh.ipynb")

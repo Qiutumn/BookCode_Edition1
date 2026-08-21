@@ -1,4 +1,5 @@
 r"""构建第二章中文版 (.ipynb + .org)。运行方式见本文件末尾。"""
+import hashlib
 import os
 import sys
 
@@ -93,11 +94,24 @@ $$
 当 $\sigma_{\sigma}$ 较大时,模型甚至认为往反方向踢也不是太糟糕的主意。
 """},
     {"type": "code", "source": r"""%matplotlib inline
+import os
+
 import arviz as az
 import matplotlib.pyplot as plt
 import numpy as np
 import pymc as pm
 from scipy import stats
+
+EXECUTION_PROFILE = os.environ.get("BMCP_EXECUTION_PROFILE", "release").lower()
+if EXECUTION_PROFILE not in {"smoke", "release"}:
+    raise ValueError("BMCP_EXECUTION_PROFILE 必须是 smoke 或 release")
+if EXECUTION_PROFILE == "smoke":
+    DRAWS, TUNE, CHAINS, PREDICTIVE_SAMPLES = 100, 100, 2, 200
+    DIAGNOSTIC_TUNE = 300
+else:
+    DRAWS, TUNE, CHAINS, PREDICTIVE_SAMPLES = 1000, 1000, 4, 1000
+    DIAGNOSTIC_TUNE = 1500
+RANDOM_SEED = 521
 """},
     {"type": "code", "source": r"""az.style.use("arviz-grayscale")
 plt.rcParams['figure.dpi'] = 300
@@ -120,7 +134,8 @@ for sigma in sigmas_rad:
         # 用 pm.Deterministic 把"角度 -> 进球概率"这一变换记录进模型,
         # 这样它的值也会随先验/后验样本一起被保存下来
         p_goal = pm.Deterministic("p_goal", 2 * Phi(pm.math.arctan(half_length / penalty_point) / σ) - 1)
-        pps = pm.sample_prior_predictive(250)
+        pps = pm.sample_prior_predictive(
+            min(PREDICTIVE_SAMPLES, 250), random_seed=RANDOM_SEED)
         ppss.append(pps)
 """},
     {"type": "code", "source": r"""fig, axes = plt.subplots(1, 3, subplot_kw=dict(projection="polar"), figsize=(10, 4))
@@ -134,7 +149,7 @@ for sigma, pps, ax in zip(sigmas_deg, ppss, axes):
                marker=".", cmap="viridis_r", vmin=0.1)
     ax.fill_between(np.linspace(-max_angle, max_angle, 100), 0, 1.01, alpha=0.25)
     ax.set_yticks([])
-    ax.set_title(f"$\sigma = \mathcal{{HN}}({sigma})$")
+    ax.set_title(fr"$\sigma = \mathcal{{HN}}({sigma})$")
     ax.plot(0,0, 'o')
 fig.colorbar(cax, extend="min", ticks=[1, 0.5, 0.1], shrink=0.7, aspect=40)
 
@@ -192,10 +207,15 @@ plt.savefig("img/chp02/prior_predictive_distributions_01.png", bbox_inches="tigh
 with pm.Model() as model:
     θ = pm.Beta("θ", 1, 1)
     y_obs = pm.Binomial("y_obs",n=1, p=θ, observed=Y)
-    idata_b = pm.sample(1000)
-    idata_b.extend(pm.sample_posterior_predictive(idata_b))
+    idata_b = pm.sample(
+        draws=DRAWS, tune=TUNE, chains=CHAINS, cores=1,
+        random_seed=RANDOM_SEED)
+    idata_b.extend(pm.sample_posterior_predictive(
+        idata_b, random_seed=RANDOM_SEED))
 """},
-    {"type": "code", "source": r"""pred_dist = az.extract(idata_b, group="posterior_predictive", num_samples=1000)["y_obs"].values
+    {"type": "code", "source": r"""pred_dist = az.extract(
+    idata_b, group="posterior_predictive", num_samples=PREDICTIVE_SAMPLES,
+    rng=RANDOM_SEED)["y_obs"].values
 pred_dist.sum(0).shape
 """},
     {"type": "code", "source": r"""_, ax = plt.subplots(1, 2, figsize=(12, 4), constrained_layout=True)
@@ -321,7 +341,9 @@ idatas = [idata1,
 _, axes = plt.subplots(len(idatas), 3, figsize=(10, 10), sharex="col")
 
 for idata, ax in zip(idatas, axes):
-    az.plot_ppc(idata, ax=ax[0], color="C1", alpha=0.01, mean=False, legend=False)
+    az.plot_ppc(
+        idata, ax=ax[0], colors=["C1", "k", "C0"],
+        alpha=0.01, mean=False, legend=False)
     az.plot_kde(idata.observed_data["y"].values, ax=ax[0], plot_kwargs={"color":"C4", "zorder":3})
     ax[0].set_xlabel("")
     az.plot_bpv(idata, kind="p_value", ax=ax[1])
@@ -590,17 +612,23 @@ $\theta2$ 的跨度也会趋近于零。用 PyMC 我们可以这样写这个模�
     {"type": "code", "source": r"""with pm.Model() as model_0:
     θ1 = pm.Normal("θ1", 0, 1, initval=0.1)
     θ2 = pm.Uniform("θ2", -θ1, θ1)
-    idata_0 = pm.sample()
+    idata_0 = pm.sample(
+        draws=DRAWS, tune=TUNE, chains=CHAINS, cores=1,
+        random_seed=RANDOM_SEED)
 
 with pm.Model() as model_1:
     θ1 = pm.HalfNormal("θ1", 1 / (2/np.pi)**0.5)
     θ2 = pm.Uniform("θ2", -θ1, θ1)
-    idata_1 = pm.sample()
+    idata_1 = pm.sample(
+        draws=DRAWS, tune=TUNE, chains=CHAINS, cores=1,
+        random_seed=RANDOM_SEED)
 
 with pm.Model() as model_1bis:
     θ1 = pm.HalfNormal("θ1", 1 / (2/np.pi)**0.5)
     θ2 = pm.Uniform("θ2", -θ1, θ1)
-    idata_1bis = pm.sample(target_accept=0.95)
+    idata_1bis = pm.sample(
+        draws=DRAWS, tune=DIAGNOSTIC_TUNE, chains=CHAINS, cores=1,
+        target_accept=0.99, random_seed=RANDOM_SEED)
 
 idatas = [idata_0, idata_1, idata_1bis]
 """},
@@ -658,8 +686,15 @@ $\theta2$。注意我们把 $\theta1$ 的标准差参数设为 $\frac{1}{\sqrt{(
 上面已经用重参数化后的 `model_1`(以及进一步调大 `target_accept` 的 `model_1bis`)重新
 拟合了模型。从上面两幅图可以看到,`model_1` 的发散数量已经大幅减少,但依然能看到零星几个。
 一个可以尝试减少发散的简单办法,是调高 `target_accept` 的值——默认是 0.8,合法的最大值是 1。
-`model_1bis` 和 `model_1` 唯一的区别,就是把这个采样参数改成了
-`pm.sample(., target_accept=0.95)`。可以看到,这样一来我们终于把所有发散都消除了。这已经是
+`model_1bis` 和 `model_1` 的区别,是进一步增加调优步数,并把这个采样参数改成了
+`pm.sample(., target_accept=0.99)`。
+
+> **中文版现代化说明**: 原书示例使用 `target_accept=0.95`;在当前 PyMC 与本书固定随机种子的
+> 发布执行中,该设置仍偶尔产生少量发散。中文版采用 0.99,并在 smoke/release 档分别使用 300/1500
+> 次调优迭代,使本例所声称的“消除发散”与实际生成的诊断结果一致。调高该参数不是通用修复方法;
+> 真实分析仍应优先检查模型几何、重参数化方式、R-hat 与 ESS。
+
+可以看到,这样一来我们终于把所有发散都消除了。这已经是
 好消息了,但要真正信任这些样本,我们仍然需要按前面几节的方法检查 $\hat R$ 和 ESS。
 
 > **重参数化**:重参数化可以把一个难以采样的后验几何形状,转变成一个更容易采样的形状。这样
@@ -760,16 +795,24 @@ idatas_cmp = {}
 with pm.Model() as mA:
     σ = pm.HalfNormal("σ", 1)
     y = pm.SkewNormal("y", mu=0, sigma=σ, alpha=1, observed=y_obs)
-    idataA = pm.sample(idata_kwargs={"log_likelihood":True})
-    idataA.extend(pm.sample_posterior_predictive(idataA))
+    idataA = pm.sample(
+        draws=DRAWS, tune=TUNE, chains=CHAINS, cores=1,
+        random_seed=RANDOM_SEED,
+        idata_kwargs={"log_likelihood": True})
+    idataA.extend(pm.sample_posterior_predictive(
+        idataA, random_seed=RANDOM_SEED))
     idatas_cmp["mA"] = idataA
 
 # 用固定均值、随机标准差的正态似然生成数据
 with pm.Model() as mB:
     σ = pm.HalfNormal("σ", 1)
     y = pm.Normal("y", 0, σ, observed=y_obs)
-    idataB = pm.sample(idata_kwargs={"log_likelihood":True})
-    idataB.extend(pm.sample_posterior_predictive(idataB))
+    idataB = pm.sample(
+        draws=DRAWS, tune=TUNE, chains=CHAINS, cores=1,
+        random_seed=RANDOM_SEED,
+        idata_kwargs={"log_likelihood": True})
+    idataB.extend(pm.sample_posterior_predictive(
+        idataB, random_seed=RANDOM_SEED))
     idatas_cmp["mB"] = idataB
 
 # 用随机均值、随机标准差的正态似然生成数据
@@ -777,8 +820,12 @@ with pm.Model() as mC:
     μ = pm.Normal("μ", 0, 1)
     σ = pm.HalfNormal("σ", 1)
     y = pm.Normal("y", μ, σ, observed=y_obs)
-    idataC = pm.sample(idata_kwargs={"log_likelihood":True})
-    idataC.extend(pm.sample_posterior_predictive(idataC))
+    idataC = pm.sample(
+        draws=DRAWS, tune=TUNE, chains=CHAINS, cores=1,
+        random_seed=RANDOM_SEED,
+        idata_kwargs={"log_likelihood": True})
+    idataC.extend(pm.sample_posterior_predictive(
+        idataC, random_seed=RANDOM_SEED))
     idatas_cmp["mC"] = idataC
 """},
     {"type": "markdown", "source": r"""
@@ -794,24 +841,29 @@ cmp.round(2)
 
 1. 第一列是索引,列出了传给 `az.compare(.)` 的字典中各模型的名字(键)。
 2. `rank`:模型的排名,从 0(预测精度最高的模型)到模型总数。
-3. `loo`:ELPD 的取值列表。数据框总是按 ELPD 从优到劣排序。
+3. `elpd_loo`:ELPD 的取值列表。数据框总是按 ELPD 从优到劣排序。
 4. `p_loo`:惩罚项的取值列表。可以粗略地把它理解为"估计的有效参数个数"(但不要太当真)。
    对结构更丰富的模型(比如层级模型),这个值可能低于模型实际的参数个数;而当模型预测能力
    很弱、可能存在严重的模型误设时,这个值也可能远高于实际参数个数。
-5. `d_loo`:每个模型的 LOO 值,与排名最高模型的 LOO 值之间的相对差异列表。因此第一名模型
-   这一列必然是 0。
-6. `weight`:分配给每个模型的权重。可以粗略地理解为(在所比较的这组模型中)给定数据下每个
-   模型的概率,详见"模型平均"一节。
+5. `elpd_diff`:每个模型的 ELPD 值,与排名最高模型的 ELPD 值之间的相对差异列表。因此第一名
+   模型这一列必然是 0。
+6. `weight`:分配给每个模型的预测组合权重,详见“模型平均”一节。它的具体含义取决于
+   `az.compare(.)` 采用的方法;默认的堆叠权重以组合后的样本外预测表现为优化目标,不等同于
+   “模型为真”的后验概率。
 7. `se`:ELPD 计算的标准误。
 8. `dse`:两个模型 ELPD 差值的标准误。`dse` 不一定等于 `se`,因为不同模型之间 ELPD 的不确定
    性可能是相关的。排名最高的模型这一列的 `dse` 恒为 0。
 9. `warning`:如果为 `True`,说明 LOO 近似可能不可靠。
-10. `loo_scale`:所报告数值的尺度。默认是对数尺度(log)。其他选项包括 deviance(即对数得分
+10. `scale`:所报告数值的尺度。默认是对数尺度(log)。其他选项包括 deviance(即对数得分
     乘以 -2,这会反转排序方向:ELPD 越低越好)和 negative-log(对数得分乘以 -1,和 deviance
     一样,数值越低越好)。
 
+    中文版现代化说明:较早版本的 ArviZ 把第 5、10 两列分别叫作 `d_loo` 与 `loo_scale`;
+    当前 ArviZ（本书使用的版本）已将它们重命名为 `elpd_diff` 与 `scale`，第 3 列也相应地
+    叫作 `elpd_loo` 而非 `loo`。下文提到这些列名之处已同步更新。
+
 我们也可以把表格里的部分信息用图形表示出来,如下图所示。模型同样按预测精度从高到低排列。
-空心点代表 `loo` 的值,黑色实心点是未经 `p_loo` 惩罚项调整的预测精度。黑色线段代表 LOO 计算
+空心点代表 `elpd_loo` 的值,黑色实心点是未经 `p_loo` 惩罚项调整的预测精度。黑色线段代表 LOO 计算
 的标准误 `se`。灰色线段以三角形为中心,代表每个模型与最优模型之间 LOO 差值的标准误 `dse`。
 我们可以看到 `mB` $\approx$ `mC` $>$ `mA`。
 """},
@@ -821,7 +873,7 @@ plt.savefig("img/chp02/compare_dummy.png")
     {"type": "markdown", "source": r"""
 从上表和上图可以看到,模型 `mA` 排名最低,和另外两个模型明显拉开了差距。下面我们重点讨论
 另外两个模型,因为它们之间的差异更微妙。`mB` 预测精度最高,但和 `mC` 相比差距可以忽略不计。
-经验法则是:LOO 差值(`d_loo`)小于 4 就算是小差异。这两个模型的区别在于:`mB` 的均值固定
+经验法则是:LOO 差值(`elpd_diff`)小于 4 就算是小差异。这两个模型的区别在于:`mB` 的均值固定
 为 0,而 `mC` 的均值有自己的先验分布。LOO 会惩罚这种额外增加的先验灵活性——体现在 `mC` 的
 `p_loo` 比 `mB` 更大,并且"黑点(未惩罚 ELPD)"与"空心点($\text{ELPD}_\text{LOO-CV}$)"
 之间的距离,`mC` 也比 `mB` 更大。我们还能看到这两个模型的 `dse` 远小于它们各自的 `se`,说明
@@ -989,9 +1041,37 @@ $\sum_{j=1}^{k} w_j = 1$。$p(y_i \mid y_{-i}, M_j)$ 是模型 $M_j$ 的留一�
 `mB` 已经被纳入我们比较的模型集合,`mC` 就不再提供新的信息——换句话说,再把它包含进来纯属
 多余。
 
-函数 `pm.sample_posterior_predictive_w(.)`(或在新版本 PyMC 里对应的加权后验预测采样方式)
-接受一组迹和一组权重,让我们能方便地生成加权后验预测样本。权重可以来自任何地方,但使用
-`az.compare(., method="stacking")` 算出的权重是很合理的选择。
+> **中文版现代化说明**: 原书使用的 `pm.sample_posterior_predictive_w(.)` 已不在当前 PyMC 的
+> 公共 API 中。现代做法是先让每个模型分别生成后验预测样本,再显式构造一个有限混合:按照
+> `az.compare(., method="stacking")` 给出的权重选择模型,随后从该模型的后验预测样本中抽取一行。
+> 这样既不依赖已移除的函数,也把“如何混合”这一统计操作写得更清楚。堆叠权重是为优化组合模型的
+> 样本外预测表现而求得的系数,一般不应解释为模型为真的后验概率。
+"""},
+    {"type": "code", "source": r"""stacking_cmp = az.compare(idatas_cmp, method="stacking")
+model_names = stacking_cmp.index.to_numpy()
+stacking_weights = stacking_cmp["weight"].to_numpy(dtype=float, copy=True)
+stacking_weights /= stacking_weights.sum()
+
+rng = np.random.default_rng(RANDOM_SEED)
+selected_models = rng.choice(
+    model_names, size=PREDICTIVE_SAMPLES, p=stacking_weights)
+ensemble_blocks = []
+for model_name in model_names:
+    block_size = int(np.count_nonzero(selected_models == model_name))
+    if block_size == 0:
+        continue
+    predictions = az.extract(
+        idatas_cmp[model_name], group="posterior_predictive",
+        combined=True)["y"]
+    prediction_array = np.moveaxis(
+        predictions.values, predictions.get_axis_num("sample"), 0)
+    draw_indices = rng.choice(
+        prediction_array.shape[0], size=block_size, replace=True)
+    ensemble_blocks.append(prediction_array[draw_indices])
+
+stacked_posterior_predictive = np.concatenate(ensemble_blocks, axis=0)
+rng.shuffle(stacked_posterior_predictive, axis=0)
+stacked_posterior_predictive.shape
 """},
     {"type": "markdown", "source": r"""
 ## 习题
@@ -1157,6 +1237,46 @@ PyMC 的日志信息,系统自动选用的是哪种采样器?你对这个采样�
 [^21]: 这个公式对 WAIC 等其他信息准则同样适用。
 """},
 ]
+
+
+def _attach_canonical_metadata(authored_cells):
+    """Add stable IDs and direct provenance metadata to legacy-authored cells."""
+    used_ids = set()
+    for cell in authored_cells:
+        source = cell["source"]
+        digest = hashlib.sha256(
+            f"{cell['type']}\0{source}".encode("utf-8")
+        ).hexdigest()[:16]
+        base_id = f"ch02-{'md' if cell['type'] == 'markdown' else 'code'}-{digest}"
+        cell_id = base_id
+        occurrence = 2
+        while cell_id in used_ids:
+            cell_id = f"{base_id}-{occurrence}"
+            occurrence += 1
+        used_ids.add(cell_id)
+        cell["id"] = cell_id
+
+        if "中文版补充" in source or "中文版新增" in source:
+            kind = "addition"
+        elif cell["type"] == "code" or "中文版现代化说明" in source:
+            kind = "modernization"
+        else:
+            kind = "translation"
+        authority = (
+            "notebooks_updated/chp_02.ipynb"
+            if cell["type"] == "code"
+            else "markdown/chp_02.md"
+        )
+        provenance = [authority]
+        if kind != "translation":
+            provenance.append("zh/Chapter2_ExploratoryAnalysis/build.py")
+        metadata = cell.setdefault("metadata", {})
+        metadata.setdefault("kind", kind)
+        metadata.setdefault("provenance", provenance)
+
+
+_attach_canonical_metadata(cells)
+
 
 if __name__ == "__main__":
     ipynb_path = os.path.join(HERE, "Ch2_ExploratoryAnalysis_zh.ipynb")

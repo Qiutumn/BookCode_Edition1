@@ -1,0 +1,20 @@
+schema_version = 1
+
+[unit]
+id = "frontmatter-foreword"
+title = "序言"
+source = "markdown/foreword.md"
+builder = "zh/FrontMatter/Foreword/build.py"
+
+[outputs]
+notebook = "Foreword_zh.ipynb"
+org = "Foreword_zh.org"
+
+[expectations]
+source_headings = ["# Foreword"]
+translated_headings = ["# 序言"]
+citation_keys = []
+footnote_ids = []
+anchors = ["foreword"]
+directives = { epigraph = 1 }
+code_cells = 0

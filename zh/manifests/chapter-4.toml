@@ -1,0 +1,21 @@
+schema_version = 1
+
+[unit]
+id = "chapter-4"
+title = "第四章：扩展线性模型"
+status = "available"
+builder = "Chapter4_ExtendingLinearModels/build.py"
+environment = ["pymc", "tfp"]
+
+[notebook]
+file = "Ch4_ExtendingLinearModels_zh.ipynb"
+org_file = "Ch4_ExtendingLinearModels_zh.org"
+
+[execution]
+cwd = "Chapter4_ExtendingLinearModels"
+kernel = "python3"
+timeout = 3600
+allow_errors = false
+
+[assets]
+directory = "generated"

@@ -1,0 +1,22 @@
+# Central per-unit template: Chapter 3 source files remain untouched.
+schema_version = 1
+
+[unit]
+id = "chapter-3"
+title = "第三章：线性模型与概率编程语言"
+status = "available"
+builder = "Chapter3_LinearModels/build.py"
+environment = ["pymc", "tfp"]
+
+[notebook]
+file = "Ch3_LinearModels_zh.ipynb"
+org_file = "Ch3_LinearModels_zh.org"
+
+[execution]
+cwd = "Chapter3_LinearModels"
+kernel = "python3"
+timeout = 1200
+allow_errors = false
+
+[assets]
+directory = "generated"

@@ -1,0 +1,670 @@
+# 第 5 章独立中文源清单。注册到全书或生成 Notebook/Org 不属于本次交付。
+schema_version = 1
+
+[unit]
+id = "chapter-5"
+title = "第 5 章 样条"
+status = "available"
+builder = "Chapter5_Splines/build.py"
+environment = "pymc"
+dependency_group = "pymc-splines"
+language = "zh-CN"
+
+[notebook]
+file = "Ch5_Splines_zh.ipynb"
+org_file = "Ch5_Splines_zh.org"
+generated_in_validation = false
+
+[execution]
+cwd = "Chapter5_Splines"
+kernel = "python3"
+timeout = 3600
+allow_errors = false
+profile_env = "CH5_PROFILE"
+default_profile = "smoke"
+same_code_paths_across_profiles = true
+sampling_skips = false
+full_mcmc_validated = false
+
+[execution.smoke]
+draws = 20
+tune = 20
+compare_draws = 12
+compare_tune = 12
+chains = 1
+cores = 1
+figure_dpi = 100
+
+[execution.release]
+draws = 1000
+tune = 1000
+compare_draws = 1000
+compare_tune = 1000
+chains = 4
+cores = "min(4, os.cpu_count() or 1)"
+figure_dpi = 160
+
+[assets]
+directory = "figures"
+chapter_relative = true
+expected_figure_count = 15
+expected_table_count = 1
+generated_in_validation = false
+
+[coverage]
+canonical_cells = 101
+markdown_cells = 67
+code_cells = 34
+headings = 10
+source_section_anchors = 10
+equations = 8
+figures = 15
+tables = 1
+named_code_blocks = 11
+unnamed_code_blocks = 4
+admonitions = 1
+citation_keys = 5
+citation_directives = 3
+footnotes = 13
+exercises = 16
+exercise_subitems = 39
+exercise_hints = 3
+source_notebook_code_cells = 39
+source_notebook_code_cells_represented = 39
+localized_datasets = 5
+local_helpers = 1
+constructed_models = 11
+
+[provenance.markdown]
+path = "../../markdown/chp_05.md"
+authority = "complete-prose"
+sha256 = "b75738913d0f6b08b7012db19dce1294cd766866093f46cc30b63ba89172ab86"
+bytes = 52935
+
+[provenance.notebook]
+path = "../../notebooks_updated/chp_05.ipynb"
+authority = "code-modernization-starting-point"
+sha256 = "759c4a9e84a3e00893c16ea8ecdf82f76cb1977a5fa3eaaebba983a17d1f6a06"
+bytes = 5687620
+code_cells = 39
+
+[provenance.build]
+path = "build.py"
+role = "canonical-cell-list"
+sha256 = "1cfca5ca3289b0a77d4d54dc1625b59b083f7efdfe42ab1ca5de3af006b2f42f"
+bytes = 89235
+
+[dependencies]
+group = "pymc-splines"
+python = "3.12.3"
+packages = [
+  "arviz",
+  "matplotlib",
+  "numpy",
+  "pandas",
+  "patsy",
+  "pymc",
+  "pytensor",
+  "scipy",
+  "xarray",
+]
+
+[dependencies.validated_versions]
+pymc = "5.28.5"
+pytensor = "2.38.2"
+arviz = "0.23.4"
+patsy = "1.0.2"
+scipy = "1.18.0"
+numpy = "2.5.2"
+pandas = "3.0.5"
+matplotlib = "3.11.1"
+xarray = "2026.7.0"
+
+[visualization]
+categorical_palette = [
+  "#2a78d6",
+  "#eb6834",
+  "#1baf7a",
+  "#eda100",
+  "#e87ba4",
+  "#008300",
+  "#4a3aa7",
+  "#e34948",
+]
+palette_mode = "light"
+palette_validator = "dataviz/scripts/validate_palette.js"
+palette_validation_status = "blocked"
+palette_validation_blocker = "No node, nodejs, bun, or deno executable is installed."
+
+[[inventory.headings]]
+cell_id = "ch05-title-introduction"
+anchor = "chap3_5"
+level = 1
+title = "第 5 章 样条"
+source_locator = "lines 1-11"
+
+[[inventory.headings]]
+cell_id = "ch05-polynomial-regression-intro"
+anchor = "polynomial-regression"
+level = 2
+title = "多项式回归"
+source_locator = "lines 13-54"
+
+[[inventory.headings]]
+cell_id = "ch05-expanding-feature-space"
+anchor = "expanding_feature_space"
+level = 2
+title = "扩展特征空间"
+source_locator = "lines 88-139"
+
+[[inventory.headings]]
+cell_id = "ch05-introducing-splines"
+anchor = "introducing-splines"
+level = 2
+title = "样条简介"
+source_locator = "lines 206-240"
+
+[[inventory.headings]]
+cell_id = "ch05-building-design-matrix-patsy"
+anchor = "building-the-design-matrix-using-patsy"
+level = 2
+title = "使用 Patsy 构建设计矩阵"
+source_locator = "lines 351-393"
+
+[[inventory.headings]]
+cell_id = "ch05-fitting-splines-pymc-bike-intro"
+anchor = "fitting-splines-in-pymc3"
+level = 2
+title = "在 PyMC 中拟合样条"
+source_locator = "lines 469-484"
+
+[[inventory.headings]]
+cell_id = "ch05-choosing-knots-priors"
+anchor = "choosing-knots-and-prior-for-splines"
+level = 2
+title = "为样条选择节点与先验"
+source_locator = "lines 623-650"
+
+[[inventory.headings]]
+cell_id = "ch05-regularizing-prior-concept"
+anchor = "regularizing-prior-for-splines"
+level = 3
+title = "样条的正则化先验"
+source_locator = "lines 739-794"
+
+[[inventory.headings]]
+cell_id = "ch05-co2-introduction"
+anchor = "modeling-co2-uptake-with-splines"
+level = 2
+title = "用样条建模 CO₂ 吸收量"
+source_locator = "lines 811-828"
+
+[[inventory.headings]]
+cell_id = "ch05-exercises-heading"
+anchor = "exercises5"
+level = 2
+title = "练习"
+source_locator = "lines 1018-1020"
+
+[[inventory.equations]]
+label = "eq:lin_model"
+
+[[inventory.equations]]
+label = "eq:polynomial_reg"
+
+[[inventory.equations]]
+label = "eq:bfr"
+
+[[inventory.equations]]
+label = "eq:bfr2"
+
+[[inventory.equations]]
+label = "eq:GAM"
+
+[[inventory.equations]]
+label = "eq:spline_model"
+
+[[inventory.equations]]
+label = "eq:spline_regularized_prior"
+
+[[inventory.equations]]
+label = "eq:spline_regularized_GW_prior"
+
+[[inventory.named_code_blocks]]
+name = "splines_patsy"
+cell_ids = ["ch05-patsy-design-matrices-dense"]
+
+[[inventory.named_code_blocks]]
+name = "splines_patsy_plot"
+cell_ids = ["ch05-figure-weighted-bsplines"]
+
+[[inventory.named_code_blocks]]
+name = "knot_list"
+cell_ids = ["ch05-bike-knot-list"]
+
+[[inventory.named_code_blocks]]
+name = "bikes_dmatrix"
+cell_ids = ["ch05-bike-design-matrix"]
+
+[[inventory.named_code_blocks]]
+name = "splines"
+cell_ids = ["ch05-bike-spline-model"]
+
+[[inventory.named_code_blocks]]
+name = "splines_rw"
+cell_ids = ["ch05-bike-regularized-design", "ch05-bike-grw-model"]
+
+[[inventory.named_code_blocks]]
+name = "plants_co2_import"
+cell_ids = ["ch05-load-co2-data"]
+
+[[inventory.named_code_blocks]]
+name = "sp_global"
+cell_ids = ["ch05-co2-global-model"]
+
+[[inventory.named_code_blocks]]
+name = "Bi_matrix"
+cell_ids = ["ch05-co2-individual-design-matrix"]
+
+[[inventory.named_code_blocks]]
+name = "sp_individual"
+cell_ids = ["ch05-co2-individual-model"]
+
+[[inventory.named_code_blocks]]
+name = "sp_mix"
+cell_ids = ["ch05-co2-mixed-model"]
+
+[[inventory.exercises]]
+label = "5E1"
+cell_id = "ch05-exercise-5e1"
+source_locator = "lines 1022-1031"
+subitems = 3
+hints = 0
+
+[[inventory.exercises]]
+label = "5E2"
+cell_id = "ch05-exercise-5e2"
+source_locator = "lines 1033-1036"
+subitems = 0
+hints = 1
+
+[[inventory.exercises]]
+label = "5E3"
+cell_id = "ch05-exercise-5e3"
+source_locator = "lines 1038-1040"
+subitems = 0
+hints = 0
+
+[[inventory.exercises]]
+label = "5E4"
+cell_id = "ch05-exercise-5e4"
+source_locator = "lines 1042-1051"
+subitems = 3
+hints = 0
+
+[[inventory.exercises]]
+label = "5E5"
+cell_id = "ch05-exercise-5e5"
+source_locator = "lines 1053-1056"
+subitems = 0
+hints = 0
+
+[[inventory.exercises]]
+label = "5E6"
+cell_id = "ch05-exercise-5e6"
+source_locator = "lines 1058-1081"
+subitems = 2
+hints = 0
+
+[[inventory.exercises]]
+label = "5E7"
+cell_id = "ch05-exercise-5e7"
+source_locator = "lines 1083-1092"
+subitems = 3
+hints = 0
+
+[[inventory.exercises]]
+label = "5E8"
+cell_id = "ch05-exercise-5e8"
+source_locator = "lines 1094-1109"
+subitems = 4
+hints = 0
+
+[[inventory.exercises]]
+label = "5M9"
+cell_id = "ch05-exercise-5m9"
+source_locator = "lines 1111-1122"
+subitems = 4
+hints = 0
+
+[[inventory.exercises]]
+label = "5M10"
+cell_id = "ch05-exercise-5m10"
+source_locator = "lines 1124-1127"
+subitems = 0
+hints = 0
+
+[[inventory.exercises]]
+label = "5M11"
+cell_id = "ch05-exercise-5m11"
+source_locator = "lines 1129-1130"
+subitems = 0
+hints = 0
+
+[[inventory.exercises]]
+label = "5M12"
+cell_id = "ch05-exercise-5m12"
+source_locator = "lines 1132-1148"
+subitems = 4
+hints = 0
+
+[[inventory.exercises]]
+label = "5M13"
+cell_id = "ch05-exercise-5m13"
+source_locator = "lines 1150-1174"
+subitems = 5
+hints = 2
+
+[[inventory.exercises]]
+label = "5M14"
+cell_id = "ch05-exercise-5m14"
+source_locator = "lines 1176-1191"
+subitems = 5
+hints = 0
+
+[[inventory.exercises]]
+label = "5M15"
+cell_id = "ch05-exercise-5m15"
+source_locator = "lines 1193-1205"
+subitems = 2
+hints = 0
+
+[[inventory.exercises]]
+label = "5M16"
+cell_id = "ch05-exercise-5m16"
+source_locator = "lines 1207-1222"
+subitems = 4
+hints = 0
+
+[[inventory.citations]]
+key = "Gelman2020"
+
+[[inventory.citations]]
+key = "GelmanBayesianDataAnalysis2013"
+
+[[inventory.citations]]
+key = "WoodGeneralizedAdditiveModels2017"
+
+[[inventory.citations]]
+key = "Potvin1990"
+
+[[inventory.citations]]
+key = "Pedersen2019"
+
+[[inventory.footnotes]]
+id = "1"
+
+[[inventory.footnotes]]
+id = "2"
+
+[[inventory.footnotes]]
+id = "3"
+
+[[inventory.footnotes]]
+id = "4"
+
+[[inventory.footnotes]]
+id = "5"
+
+[[inventory.footnotes]]
+id = "6"
+
+[[inventory.footnotes]]
+id = "7"
+
+[[inventory.footnotes]]
+id = "8"
+
+[[inventory.footnotes]]
+id = "9"
+
+[[inventory.footnotes]]
+id = "10"
+
+[[inventory.footnotes]]
+id = "11"
+
+[[inventory.footnotes]]
+id = "12"
+
+[[inventory.footnotes]]
+id = "13"
+
+[[inventory.figures]]
+id = "fig:polynomial_regression"
+file = "figures/polynomial_regression.png"
+producer_cell = "ch05-figure-polynomial-regression"
+
+[[inventory.figures]]
+id = "fig:piecewise"
+file = "figures/piecewise.png"
+producer_cell = "ch05-figure-piecewise-polynomials"
+
+[[inventory.figures]]
+id = "fig:splines_basis"
+file = "figures/splines_basis.png"
+producer_cell = "ch05-figure-bspline-bases"
+
+[[inventory.figures]]
+id = "fig:splines_weighted"
+file = "figures/splines_weighted.png"
+producer_cell = "ch05-figure-weighted-bsplines"
+
+[[inventory.figures]]
+id = "fig:splines_realizations"
+file = "figures/splines_realizations.png"
+producer_cell = "ch05-figure-cubic-realizations"
+
+[[inventory.figures]]
+id = "fig:design_matrices"
+file = "figures/design_matrices.png"
+producer_cell = "ch05-figure-design-matrices"
+
+[[inventory.figures]]
+id = "fig:bikes_data"
+file = "figures/bikes_data.png"
+producer_cell = "ch05-figure-bike-data"
+
+[[inventory.figures]]
+id = "fig:bikes_spline_raw_data"
+file = "figures/bikes_spline_raw_data.png"
+producer_cell = "ch05-figure-bike-weighted-bases"
+
+[[inventory.figures]]
+id = "fig:bikes_data2"
+file = "figures/bikes_spline_data.png"
+producer_cell = "ch05-figure-bike-posterior-hdi"
+
+[[inventory.figures]]
+id = "fig:bikes_spline_loo_knots"
+file = "figures/bikes_spline_loo_knots.png"
+producer_cell = "ch05-figure-bike-loo-knots"
+
+[[inventory.figures]]
+id = "fig:bikes_spline_data_grw"
+file = "figures/bikes_spline_data_grw.png"
+producer_cell = "ch05-figure-bike-grw-comparison"
+
+[[inventory.figures]]
+id = "fig:sp_global"
+file = "figures/sp_global.png"
+producer_cell = "ch05-figure-co2-global"
+
+[[inventory.figures]]
+id = "fig:sp_individual"
+file = "figures/sp_individual.png"
+producer_cell = "ch05-figure-co2-individual"
+
+[[inventory.figures]]
+id = "fig:sp_mix_decomposed"
+file = "figures/sp_mix_decomposed.png"
+producer_cell = "ch05-figure-co2-mixed-decomposition"
+
+[[inventory.figures]]
+id = "fig:sp_compare"
+file = "figures/sp_compare.png"
+producer_cell = "ch05-figure-co2-loo-comparison"
+
+[[inventory.tables]]
+id = "tab:loo_splines"
+producer_cell = "ch05-bike-knot-comparison-models"
+
+[[inventory.data]]
+file = "data/bikes_hour.csv"
+source = "../../data/bikes_hour.csv"
+sha256 = "58a5b55b8a7617b669b79414bdc11893d33228e14e89e702512917558059812d"
+bytes = 1156752
+rows = 17379
+columns = 17
+reader = "pandas.read_csv"
+
+[[inventory.data]]
+file = "data/CO2_uptake.csv"
+source = "../../data/CO2_uptake.csv"
+sha256 = "a95b3b6819e39947ebb687ab6f82f8d143234d997ba00280c3952c68f1f93f65"
+bytes = 2719
+rows = 84
+columns = 5
+reader = "pandas.read_csv"
+
+[[inventory.data]]
+file = "data/spectra.csv"
+source = "../../exercises/data/spectra.csv"
+sha256 = "a4f2eac002523dac4b7f9b15181ab3c65dde05759367ff2e8641b4f596175edf"
+bytes = 1628
+rows = 148
+columns = 2
+reader = "pandas.read_csv(sep=r'\\s+', header=None, names=['X', 'Y'])"
+exercise = "5E8"
+
+[[inventory.data]]
+file = "data/babies.csv"
+source = "../../data/babies.csv"
+sha256 = "b4eedcd3efce2fe8a62e789313055aa1cfba516094d5e2d9fa27413b55805dc6"
+bytes = 6040
+rows = 800
+columns = 2
+reader = "pandas.read_csv"
+exercise = "5M11"
+
+[[inventory.data]]
+file = "data/space_influenza.csv"
+source = "../../data/space_influenza.csv"
+sha256 = "52e1f5205ddd8a87bf49ad1f68c97301f8ededf645eb50a1e6547b205aaed3a7"
+bytes = 2237
+rows = 213
+columns = 3
+reader = "pandas.read_csv"
+exercise = "5M15"
+
+[[inventory.helpers]]
+file = "spline_helper.py"
+source = "../../notebooks/scripts/splines.py"
+source_sha256 = "128eb46b5c3e7ae8ccd94d9ae99b4b05c5878ed51622443569d6fc2b6f60f502"
+local_sha256 = "1c5473bb5c2f97817b87e617cd4cf4cb222d3a34b1a81761ff46ac4b34624a3c"
+local_bytes = 2965
+modernizations = [
+  "Use numpy.linalg.lstsq instead of normal equations.",
+  "Validate one-dimensional equal-length inputs.",
+  "Return Figure and axes for caller control.",
+]
+
+[[semantic_checks]]
+id = "python-files-compile"
+status = "passed"
+details = "build.py and spline_helper.py compile with py_compile."
+
+[[semantic_checks]]
+id = "python-cells-compile"
+status = "passed"
+details = "All 34 authored Python code-cell sources compile statically."
+
+[[semantic_checks]]
+id = "canonical-cell-schema"
+status = "passed"
+details = "nb_tools.validate_cells accepted all 101 canonical cells; in-memory notebook construction succeeded."
+
+[[semantic_checks]]
+id = "stable-cell-identifiers"
+status = "passed"
+details = "All cell IDs are explicit, unique, descriptive, and match ^[A-Za-z0-9_-]{1,64}$."
+
+[[semantic_checks]]
+id = "cell-metadata"
+status = "passed"
+details = "Every cell has kind and provenance metadata; every code cell has a stable zh.output_name."
+
+[[semantic_checks]]
+id = "source-coverage"
+status = "passed"
+details = "Exact reconciliation passed for 10 anchors/headings, 8 equations, 15 figures, 1 table, 11 named code blocks, 5 citation keys, 13 footnotes, and 16 exercises."
+
+[[semantic_checks]]
+id = "notebook-code-provenance"
+status = "passed"
+details = "All 39 code-cell indices from notebooks_updated/chp_05.ipynb occur in canonical provenance metadata."
+
+[[semantic_checks]]
+id = "exercise-coverage"
+status = "passed"
+details = "16 prompts, 39 numbered subitems, and 3 explicit hints are translated."
+
+[[semantic_checks]]
+id = "localized-data-integrity"
+status = "passed"
+details = "All five chapter-local datasets match their source SHA-256 hashes and expected shapes."
+
+[[semantic_checks]]
+id = "profile-path-parity"
+status = "passed"
+details = "Smoke and release select only budgets/DPI; both retain identical model, posterior-predictive, comparison, and plotting paths."
+
+[[semantic_checks]]
+id = "spline-basis-semantics"
+status = "passed"
+details = "Current Patsy interior/boundary handling, nonzero columns, and partition of unity are asserted in canonical code."
+
+[[semantic_checks]]
+id = "bike-design-semantics"
+status = "passed"
+details = "The base design uses six interior knots; candidate designs for 3/6/9/12/18 knots are full rank; the 26-column regularized design has rank 24 as documented."
+
+[[semantic_checks]]
+id = "pymc-model-construction"
+status = "passed"
+details = "Eleven real model graphs constructed without sampling; initial points and shapes resolved, and all log probabilities were finite under PyTensor's pure-Python linker."
+
+[[semantic_checks]]
+id = "mixed-co2-identifiability"
+status = "passed"
+details = "Centered per-plant deviations sum to zero by basis coefficient; maximum absolute validation residual was 2.220446049250313e-15."
+
+[[semantic_checks]]
+id = "native-pytensor-linker"
+status = "blocked"
+details = "Native C-linker check cannot compile because the host lacks Python.h; pure-Python linker validation passed instead."
+
+[[semantic_checks]]
+id = "palette-validation"
+status = "blocked"
+details = "The required JavaScript validator could not run because no supported JavaScript runtime is installed."
+
+[[semantic_checks]]
+id = "full-mcmc"
+status = "not-run-by-design"
+details = "No pm.sample or pm.sample_posterior_predictive call was executed during validation."
+
+[[semantic_checks]]
+id = "generated-deliverables"
+status = "not-run-by-design"
+details = "No final Notebook, Org document, or chapter figure was generated during validation."

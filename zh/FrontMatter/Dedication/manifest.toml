@@ -1,0 +1,20 @@
+schema_version = 1
+
+[unit]
+id = "frontmatter-dedication"
+title = "题献"
+source = "markdown/dedication.md"
+builder = "zh/FrontMatter/Dedication/build.py"
+
+[outputs]
+notebook = "Dedication_zh.ipynb"
+org = "Dedication_zh.org"
+
+[expectations]
+source_headings = ["# Dedication"]
+translated_headings = ["# 题献"]
+citation_keys = []
+footnote_ids = []
+anchors = ["dedication"]
+directives = { epigraph = 3 }
+code_cells = 0

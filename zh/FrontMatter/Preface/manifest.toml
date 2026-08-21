@@ -1,0 +1,69 @@
+schema_version = 1
+
+[unit]
+id = "frontmatter-preface"
+title = "前言"
+source = "markdown/preface.md"
+builder = "zh/FrontMatter/Preface/build.py"
+
+[outputs]
+notebook = "Preface_zh.ipynb"
+org = "Preface_zh.org"
+
+[expectations]
+source_headings = [
+  "# Preface",
+  "## Prior knowledge",
+  "## How to read this book",
+  "### Text Highlights",
+  "### Code",
+  "### Boxes",
+  "### Code Imports",
+  "### How to interact with this book",
+  "## Acknowledgments"
+]
+translated_headings = [
+  "# 前言",
+  "## 预备知识",
+  "## 如何阅读本书",
+  "### 文本强调",
+  "### 代码",
+  "### 边注框",
+  "### 代码导入约定",
+  "### 如何与本书互动",
+  "## 致谢"
+]
+citation_keys = [
+  "Salvatier2016",
+  "dillon2017tensorflow",
+  "Kumar2019",
+  "WestfallUnderstandingAdvancedStatistical2013",
+  "blitzstein_2019"
+]
+citation_occurrences = 6
+footnote_ids = ["1"]
+anchors = [
+  "preface",
+  "prior-knowledge",
+  "how-to-read-this-book",
+  "text-highlights",
+  "code",
+  "boxes",
+  "code-imports",
+  "how-to-interact-with-this-book",
+  "acknowledgments"
+]
+source_directives = { admonition = 1, math = 1 }
+translated_directives = { admonition = 2, math = 1 }
+code_cells = 2
+preserved_output_blocks = 1
+
+[modernization]
+profile_environment_variable = "BMCP_EXECUTION_PROFILE"
+profiles = ["smoke", "release"]
+api_changes = [
+  "pymc3 -> pymc",
+  "theano -> pytensor",
+  "theano.tensor as tt -> pytensor.tensor as pt"
+]
+runtime_validation = "Scientific packages are unavailable in the system Python; code cells require static compilation only for this unit."

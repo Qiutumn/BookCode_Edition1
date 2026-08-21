@@ -1,0 +1,21 @@
+schema_version = 1
+
+[unit]
+id = "chapter-9"
+title = "第九章：端到端贝叶斯工作流"
+status = "available"
+builder = "Chapter9_BayesianWorkflow/build.py"
+environment = "pymc"
+
+[notebook]
+file = "Ch9_BayesianWorkflow_zh.ipynb"
+org_file = "Ch9_BayesianWorkflow_zh.org"
+
+[execution]
+cwd = "Chapter9_BayesianWorkflow"
+kernel = "python3"
+timeout = 1800
+allow_errors = false
+
+[assets]
+directory = "generated"

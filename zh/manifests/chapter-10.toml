@@ -1,0 +1,21 @@
+schema_version = 1
+
+[unit]
+id = "chapter-10"
+title = "第十章：概率编程语言"
+status = "available"
+builder = "Chapter10_PPL/build.py"
+environment = ["pymc", "tfp", "ppl"]
+
+[notebook]
+file = "Ch10_PPL_zh.ipynb"
+org_file = "Ch10_PPL_zh.org"
+
+[execution]
+cwd = "Chapter10_PPL"
+kernel = "python3"
+timeout = 1800
+allow_errors = false
+
+[assets]
+directory = "generated"

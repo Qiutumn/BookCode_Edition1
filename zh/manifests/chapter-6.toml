@@ -1,0 +1,21 @@
+schema_version = 1
+
+[unit]
+id = "chapter-6"
+title = "第六章：时间序列"
+status = "available"
+builder = "Chapter6_TimeSeries/build.py"
+environment = ["pymc", "tfp"]
+
+[notebook]
+file = "Ch6_TimeSeries_zh.ipynb"
+org_file = "Ch6_TimeSeries_zh.org"
+
+[execution]
+cwd = "Chapter6_TimeSeries"
+kernel = "python3"
+timeout = 3600
+allow_errors = false
+
+[assets]
+directory = "generated"

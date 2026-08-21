@@ -1,0 +1,5 @@
+# Verified top-level lock input, Python 3.12.3, 2026-08-20.
+# Install after core.lock.txt and run `python -m pip check`.
+tensorflow==2.21.0
+tensorflow-probability==0.25.0
+tf-keras==2.21.0

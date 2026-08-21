@@ -1,0 +1,21 @@
+schema_version = 1
+
+[unit]
+id = "chapter-5"
+title = "第五章：样条"
+status = "available"
+builder = "Chapter5_Splines/build.py"
+environment = "pymc"
+
+[notebook]
+file = "Ch5_Splines_zh.ipynb"
+org_file = "Ch5_Splines_zh.org"
+
+[execution]
+cwd = "Chapter5_Splines"
+kernel = "python3"
+timeout = 3600
+allow_errors = false
+
+[assets]
+directory = "generated"

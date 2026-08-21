@@ -1,0 +1,21 @@
+schema_version = 1
+
+[unit]
+id = "chapter-11"
+title = "第十一章：附录主题"
+status = "available"
+builder = "Chapter11_AppendicealTopics/build.py"
+environment = "tfp"
+
+[notebook]
+file = "Ch11_AppendicealTopics_zh.ipynb"
+org_file = "Ch11_AppendicealTopics_zh.org"
+
+[execution]
+cwd = "Chapter11_AppendicealTopics"
+kernel = "python3"
+timeout = 1800
+allow_errors = false
+
+[assets]
+directory = "img"

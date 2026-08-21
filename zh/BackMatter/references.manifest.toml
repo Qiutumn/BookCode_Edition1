@@ -1,0 +1,19 @@
+id = "references"
+title_zh = "参考文献"
+title_en = "References"
+source = "markdown/references.md"
+bibliography = "bibtex.bib"
+builder = "zh/BackMatter/references_build.py"
+notebook = "zh/BackMatter/References_zh.ipynb"
+org = "zh/BackMatter/References_zh.org"
+environment = "prose"
+expected_entries = 174
+
+[coverage]
+anchors = ["References"]
+preserve_published_titles = true
+validate_all_citation_keys = true
+
+[licenses]
+prose = "CC-BY-NC-SA-4.0"
+code = "GPL-2.0"

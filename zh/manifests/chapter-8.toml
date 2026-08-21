@@ -1,0 +1,21 @@
+schema_version = 1
+
+[unit]
+id = "chapter-8"
+title = "第八章：近似贝叶斯计算"
+status = "available"
+builder = "Chapter8_ABC/build.py"
+environment = ["pymc", "ml"]
+
+[notebook]
+file = "Ch8_ABC_zh.ipynb"
+org_file = "Ch8_ABC_zh.org"
+
+[execution]
+cwd = "Chapter8_ABC"
+kernel = "python3"
+timeout = 2400
+allow_errors = false
+
+[assets]
+directory = "generated"

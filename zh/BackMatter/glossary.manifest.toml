@@ -1,0 +1,18 @@
+id = "glossary"
+title_zh = "术语表"
+title_en = "Glossary"
+source = "markdown/glossary.md"
+builder = "zh/BackMatter/glossary_build.py"
+notebook = "zh/BackMatter/Glossary_zh.ipynb"
+org = "zh/BackMatter/Glossary_zh.org"
+environment = "prose"
+expected_terms = 39
+
+[coverage]
+anchors = ["glossary"]
+source_headword_order = true
+preserve_english_headwords = true
+
+[licenses]
+prose = "CC-BY-NC-SA-4.0"
+code = "GPL-2.0"

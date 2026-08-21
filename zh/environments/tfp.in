@@ -1,0 +1,4 @@
+# Direct TensorFlow Probability stack verified locally.
+tensorflow==2.21.0
+tensorflow-probability==0.25.0
+tf-keras==2.21.0
