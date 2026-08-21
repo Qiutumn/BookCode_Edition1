@@ -426,6 +426,46 @@ def ar1_trajectory_distribution(rho, innovation_scale, num_timesteps, name="ar1"
     return tfd.MultivariateNormalTriL(loc=loc, scale_tril=scale_tril, name=name)
 
 
+def ar1_lgssm(rho, ar_sigma, noise_sigma, num_timesteps, name="ar1_lgssm"):
+    '''把标量 AR(1) 潜在过程构造成 LinearGaussianStateSpaceModel。
+
+    与 ``ar1_trajectory_distribution``（稠密 num_timesteps×num_timesteps
+    协方差的 MVN）不同，这里通过卡尔曼滤波递推解析边缘化潜在轨迹：
+    对数密度与梯度的计算量随 num_timesteps 线性增长，而不是平方甚至立方增长。
+    对较长序列（数百步以上），联合采样整条稠密协方差路径会让 NUTS 的每一次
+    梯度求值都很昂贵，实践中可能耗尽内存或使内核挂起；用本函数配合
+    ``TransformedDistribution(lgssm, tfb.Shift(baseline))`` 把已知的
+    均值分量（如 GAM 的趋势加季节性）加到潜在 AR 分量上，只对全局参数
+    （rho、ar_sigma 及噪声尺度）做 NUTS 采样，再用 ``posterior_sample``
+    或 ``posterior_marginals`` 事后恢复潜在轨迹，比联合采样整条路径快得多。
+
+    观测/状态维度恒为 1；调用方需要给观测数据附加长度为 1 的末尾维度。
+    '''
+    rho = tf.convert_to_tensor(rho)
+    dtype = rho.dtype
+    ar_sigma = tf.convert_to_tensor(ar_sigma, dtype=dtype)
+    noise_sigma = tf.convert_to_tensor(noise_sigma, dtype=dtype)
+    transition_matrix = tf.linalg.LinearOperatorFullMatrix(rho[..., None, None])
+    transition_noise = tfd.MultivariateNormalDiag(scale_diag=ar_sigma[..., None])
+    observation_matrix = tf.linalg.LinearOperatorIdentity(1, dtype=dtype)
+    observation_noise = tfd.MultivariateNormalDiag(scale_diag=noise_sigma[..., None])
+    # 平稳分布的方差 ar_sigma**2 / (1 - rho**2) 作为初始状态先验，避免链条起点
+    # 依赖任意选择、且与后续步骤的平稳分布不一致。
+    stationary_scale = ar_sigma / tf.sqrt(1.0 - tf.square(rho))
+    initial_state_prior = tfd.MultivariateNormalDiag(
+        loc=tf.zeros_like(rho)[..., None], scale_diag=stationary_scale[..., None]
+    )
+    return tfd.LinearGaussianStateSpaceModel(
+        num_timesteps=num_timesteps,
+        transition_matrix=transition_matrix,
+        transition_noise=transition_noise,
+        observation_matrix=observation_matrix,
+        observation_noise=observation_noise,
+        initial_state_prior=initial_state_prior,
+        name=name,
+    )
+
+
 assert tfp.__version__.startswith("0.25"), tfp.__version__
 assert int(tf.__version__.split(".")[0]) >= 2
         """,
@@ -479,7 +519,7 @@ fig.autofmt_xdate()
         "ch06-co2-figure-and-regression-equation",
         r"""
 <a id="fig:fig1_co2_by_month"></a>
-**图 6.1**　1966 年 1 月至 2019 年 2 月莫纳罗亚的月度 CO₂ 测量值。黑色实线是训练集，灰色虚线是测试集。数据同时呈现强烈的上升趋势和季节性模式。
+**图 6.1**　1966 年 1 月至 2019 年 1 月莫纳罗亚的月度 CO₂ 测量值。黑色实线是训练集，灰色虚线是测试集。数据同时呈现强烈的上升趋势和季节性模式。
 
 这里有一个月度大气 CO₂ 浓度观测向量 $y_t$，其中 $t=[0,\dots,636]$，每个元素都对应一个时间戳。可以把一年中的月份解析成 $[1,2,3,\dots,12,1,2,\dots]$。回顾线性回归，其似然可以写成：
 
@@ -763,7 +803,8 @@ changepoints_demo = np.linspace(0.0, 1.0, n_changepoints + 2)[1:-1]
 A_demo = (t_demo[:, None] > changepoints_demo).astype(np.float32)
 
 k_demo, m_demo = 2.5, 40.0
-delta_demo = np_rng.laplace(loc=0.0, scale=0.1, size=n_changepoints)
+rng = cell_numpy_rng("ch06-step-linear-function")
+delta_demo = rng.laplace(loc=0.0, scale=0.1, size=n_changepoints)
 growth_demo = (k_demo + A_demo @ delta_demo) * t_demo
 offset_demo = m_demo + A_demo @ (-changepoints_demo * delta_demo)
 trend_demo = growth_demo + offset_demo
@@ -870,8 +911,11 @@ ax.legend(frameon=False)
         "ch06-gam-model-prose",
         r"""
 下面为月度 CO₂ 构造一个类似 Facebook Prophet 的 GAM。我们为 `k` 与 `m` 设置弱信息先验，表达月度观测总体向上增长的知识。这样，先验预测会落在与实际观测相近的量级，而不再像图 6.3 那样过度宽泛。
+
+> **中文版现代化说明**：变点位置 `s_gam` 在完整序列（含训练集与测试集）的 $[0,1]$ 归一化时间轴上等距排列；由于测试集占最后约 19% 的时间跨度，12 个变点中有 2 个落在训练区间之外。训练阶段这两个变点对应的 `A_gam` 列在训练数据上恒为 0，相应的 `delta` 分量因此完全由先验主导、不受训练似然约束——在使用合理先验的贝叶斯模型下这不会导致数值问题，但意味着这两个变点实际上不参与训练期间的趋势拟合，只在预测阶段外推增长率时才可能起作用。
         """,
         lines="L517-L523",
+        notes="声明变点位置按完整序列而非仅训练区间等距排列，其中 2 个变点落在测试区间。",
     ),
     code(
         "ch06-gam-design-and-model",
@@ -1212,40 +1256,79 @@ def make_gam_with_latent_ar(training=True):
         seasonal_component, trend_component, noise_sigma = yield from gam_components()
         rho = yield tfd.Uniform(-0.99, 0.99, name="rho")
         ar_sigma = yield tfd.HalfNormal(2.0, name="ar_sigma")
-        latent_ar = yield ar1_trajectory_distribution(
-            rho, ar_sigma, n_steps, name="latent_ar"
-        )
         baseline = seasonal_component[..., :n_steps] + trend_component[..., :n_steps]
-        yield tfd.Independent(
-            tfd.Normal(baseline + latent_ar, noise_sigma[..., None]),
-            reinterpreted_batch_ndims=1,
-            name="observed",
+        lgssm = ar1_lgssm(rho, ar_sigma, noise_sigma, n_steps)
+        yield tfd.TransformedDistribution(
+            lgssm, tfb.Shift(baseline[..., None]), name="observed"
         )
 
     return model
 
 
 gam_latent_ar_model = make_gam_with_latent_ar(training=True)
-assert gam_latent_ar_model.event_shape.observed[-1] == len(co2_training)
+assert gam_latent_ar_model.event_shape.observed == [len(co2_training), 1]
 
 latent_ar_draws, latent_ar_stats = run_windowed_nuts(
     gam_latent_ar_model,
     seed=split_seed("latent-ar-mcmc")[0],
-    observed=tf.convert_to_tensor(co2_training["CO2"].to_numpy(), tf.float32),
+    observed=tf.convert_to_tensor(co2_training["CO2"].to_numpy(), tf.float32)[:, None],
 )
 latent_ar_idata = tfp_draws_to_idata(latent_ar_draws, latent_ar_stats)
         """,
         lines="L840-L880",
         code_block="gam_with_latent_ar",
-        notes="用公开 MVN Cholesky 构造完整潜在 AR 轨迹，替代只返回末状态的旧 Autoregressive 用法。",
+        notes=(
+            "中文版现代化说明：原始联合采样整条稠密协方差潜在 AR 轨迹（"
+            "num_timesteps≈517）在本地无原生编译器的执行环境下会导致单个梯度求值"
+            "过慢、内核在实际运行中挂起。改用 ar1_lgssm 通过卡尔曼滤波解析边缘化"
+            "潜在轨迹：NUTS 只对 rho、ar_sigma 等全局参数采样，观测分布用 "
+            "TransformedDistribution(lgssm, tfb.Shift(baseline)) 把已知的 GAM "
+            "趋势加季节性均值叠加到潜在 AR 分量上；潜在轨迹本身在下一单元中"
+            "用 posterior_sample 事后恢复，而不是作为联合采样的一部分。"
+        ),
     ),
     code(
         "ch06-latent-ar-plots",
         r"""
-latent_posterior = latent_ar_idata.posterior.stack(sample=("chain", "draw"))
-latent_ar_component = np.asarray(latent_posterior["latent_ar"].values)
-if latent_ar_component.shape[0] != len(co2_training):
-    latent_ar_component = np.moveaxis(latent_ar_component, -1, 0)
+latent_posterior = latent_ar_idata.posterior
+
+# 中文版现代化说明：latent_ar 已被解析边缘化，不再是采样变量；
+# 用后验中的 GAM 与 AR 参数重建 baseline，再用 posterior_sample 恢复潜在轨迹。
+n_steps_latent_ar = len(co2_training)
+seasonal_posterior = tf.einsum(
+    "ij,...j->...i", X_pred, tf.convert_to_tensor(latent_posterior["beta"].values)
+)
+growth_rate_posterior = tf.convert_to_tensor(
+    latent_posterior["k"].values
+)[..., None] + tf.einsum(
+    "ij,...j->...i", A_gam, tf.convert_to_tensor(latent_posterior["delta"].values)
+)
+offset_posterior = tf.convert_to_tensor(
+    latent_posterior["m"].values
+)[..., None] + tf.einsum(
+    "ij,...j->...i", A_gam, -s_gam * tf.convert_to_tensor(latent_posterior["delta"].values)
+)
+trend_posterior_full = growth_rate_posterior * t_gam + offset_posterior
+baseline_posterior = (seasonal_posterior + trend_posterior_full)[..., :n_steps_latent_ar]
+
+rho_posterior = tf.convert_to_tensor(latent_posterior["rho"].values)
+ar_sigma_posterior = tf.convert_to_tensor(latent_posterior["ar_sigma"].values)
+noise_sigma_posterior = tf.convert_to_tensor(latent_posterior["noise_sigma"].values)
+residual_posterior = (
+    tf.convert_to_tensor(co2_training["CO2"].to_numpy(), tf.float32) - baseline_posterior
+)[..., None]
+
+lgssm_posterior = ar1_lgssm(
+    rho_posterior, ar_sigma_posterior, noise_sigma_posterior, n_steps_latent_ar
+)
+latent_ar_sample = lgssm_posterior.posterior_sample(
+    residual_posterior, sample_shape=(), seed=split_seed("latent-ar-recover")[0]
+)
+latent_ar_array = np.asarray(latent_ar_sample)[..., 0]  # (chain, draw, n_steps)
+latent_ar_component = np.moveaxis(
+    latent_ar_array.reshape(-1, latent_ar_array.shape[-1]), -1, 0
+)
+assert latent_ar_component.shape[0] == n_steps_latent_ar
 
 fig, axes = plt.subplots(3, 1, figsize=(10, 8), sharex=True, constrained_layout=True)
 # 趋势与季节性可由相同后验参数和设计矩阵重建；这里突出潜在 AR 成分。
@@ -1269,6 +1352,7 @@ az.plot_posterior(latent_ar_idata, var_names=["noise_sigma", "ar_sigma", "rho"],
         """,
         lines="L882-L917 plus migration notebook plot cells",
         figures=("fig:fig12_posterior_predictive_ar1", "fig:fig13_ar1_likelihood_rho2"),
+        notes="中文版现代化说明：用 LGSSM 的 posterior_sample 事后恢复潜在 AR 轨迹，取代原先直接读取联合采样变量。",
     ),
     md(
         "ch06-latent-ar-captions",
@@ -1327,7 +1411,8 @@ $\alpha$ 越接近 1，观测噪声相对越大，潜在序列越平滑；$\alph
         r"""
 x_smooth = np.linspace(0.0, 30.0, 150, dtype=np.float32)
 f_smooth = np.exp(1.0 + np.sqrt(x_smooth) - np.exp(x_smooth / 15.0)).astype(np.float32)
-y_smooth = f_smooth + np_rng.normal(0.0, 1.0, size=len(x_smooth)).astype(np.float32)
+rng = cell_numpy_rng("ch06-gaussian-random-walk-model")
+y_smooth = f_smooth + rng.normal(0.0, 1.0, size=len(x_smooth)).astype(np.float32)
 
 @tfd.JointDistributionCoroutineAutoBatched
 def gaussian_random_walk_model():
@@ -1395,6 +1480,19 @@ release_resources(
     "latent_ar_component",
     "latent_ar_draws",
     "latent_ar_idata",
+    "latent_posterior",
+    "seasonal_posterior",
+    "growth_rate_posterior",
+    "offset_posterior",
+    "trend_posterior_full",
+    "baseline_posterior",
+    "rho_posterior",
+    "ar_sigma_posterior",
+    "noise_sigma_posterior",
+    "residual_posterior",
+    "lgssm_posterior",
+    "latent_ar_sample",
+    "latent_ar_array",
     "random_walk_draws",
     "random_walk_idata",
     "latent_smooth",
@@ -1485,10 +1583,12 @@ ax.set(xlabel="年份", ylabel="活产数（千人）")
 **图 6.15**　美国月度活产数（1948–1979）。纵轴单位为千人。序列同时呈现趋势、年度季节性和随时间变化的局部结构。
 
 原书实现通过自定义递推计算 SARIMA 似然。TFP 0.25 没有一个与该教学公式完全对应的专用公共 `SARIMA` 分布；因此，下面用公开 TensorFlow 的 `tf.while_loop` 和 `TensorArray` 给出自包含实现，而不是导入 TFP 私有循环或种子工具。这个选择保留原书“理解递推似然”的教学目的[^10]。把可调用的对数后验传给 TFP MCMC 的一般方式参见 {cite:p}`lao2020tfpmcmc`。
+
+> **中文版现代化说明**：下面 `sarima_residuals` 把常规 AR/MA 项与季节 AR/MA 项分别相加，是真正乘法 SARIMA 的一种加法近似——完整的 $\operatorname{SARIMA}(p,d,q)(P,D,Q)_s$ 需要把常规与季节自回归/移动平均多项式相乘，因此还应包含常规项与季节项的交叉滞后（例如 $\operatorname{SARIMA}(1,\cdot,\cdot)(1,\cdot,\cdot)_{12}$ 的 AR 多项式 $(1-\phi B)(1-\Phi B^{12})$ 展开后还有一项 $\phi\Phi B^{13}$，本实现未包含这一交叉项）。这一简化足以支撑本节关于自包含似然递推与 LOO 比较的教学目的，但产出的系数不能等同于标准乘法 SARIMA 的估计值。
         """,
         lines="L1091-L1137",
         anchors=("fig:fig15_birth_by_month",),
-        notes="说明 TFP 0.25 无专用公共 SARIMA 分布及自包含等价实现。",
+        notes="说明 TFP 0.25 无专用公共 SARIMA 分布及自包含等价实现；并声明当前递推是加法近似而非完整乘法 SARIMA。",
     ),
     code(
         "ch06-sarima-likelihood",
@@ -1833,10 +1933,11 @@ $$
 num_linear_steps = 100
 linear_time = np.arange(num_linear_steps, dtype=np.float32)
 true_intercept, true_slope = 0.5, 0.08
+rng = cell_numpy_rng("ch06-linear-growth-simulate")
 linear_observed = (
     true_intercept
     + true_slope * linear_time
-    + np_rng.normal(0.0, 0.5, num_linear_steps)
+    + rng.normal(0.0, 0.5, num_linear_steps)
 ).astype(np.float32)
 assert linear_observed.shape == (num_linear_steps,)
         """,
@@ -2274,9 +2375,18 @@ else:
         for parameter, value in zip(birth_model.parameters, birth_parameter_draws)
     }
 
-# tfp.sts 接受与 model.parameters 相同顺序的参数样本。
+# 中文版现代化说明：windowed_adaptive_nuts 返回的每个参数张量前两轴分别是
+# draw、chain；tfp.sts.decompose_by_component/forecast 期望一条展平后的样本轴，
+# 而不是把 chain 轴当成模型自身的批量轴。用 flatten_and_select 展平并按
+# BUDGET["sts_parameter_samples"] 确定性抽取子样本，而不是把原始
+# [draw, chain, ...] 数组直接传入。
 birth_parameter_samples = [
-    birth_parameter_mapping[parameter.name] for parameter in birth_model.parameters
+    flatten_and_select(
+        birth_parameter_mapping[parameter.name],
+        BUDGET["sts_parameter_samples"],
+        name=parameter.name,
+    )
+    for parameter in birth_model.parameters
 ]
 
 birth_component_dists = tfp.sts.decompose_by_component(
@@ -2306,7 +2416,12 @@ assert birth_forecast_mean.shape[-1] == n_birth_forecast
         """,
         lines="L1995-L2045 plus migration notebook BSTS sampler",
         code_block="tfp_sts_example2_result",
-        notes="使用 MonthBegin/freq=MS 替代 np.timedelta64('M') 与 pandas freq='M'。",
+        notes=(
+            "使用 MonthBegin/freq=MS 替代 np.timedelta64('M') 与 pandas freq='M'；"
+            "并用 flatten_and_select 把 [draw, chain, ...] 参数样本展平为一条样本轴、"
+            "按 sts_parameter_samples 预算抽取子样本，避免 chain 轴被 tfp.sts 误当成"
+            "模型自身的批量轴而导致成分分解/预测形状错误。"
+        ),
     ),
     code(
         "ch06-bsts-result-plot",
@@ -2548,7 +2663,7 @@ assert datetime_index[0].day_name() == "Friday"
     md(
         "ch06-exercises-m5-m6",
         r"""
-**6M5.** 用基函数构造的设计矩阵是否真的比稀疏矩阵有更好的条件数？使用 `numpy.linalg.cond` 比较以下同秩设计矩阵：
+**6M5.** 用基函数构造的设计矩阵是否真的比稀疏矩阵有更好的条件数？使用 `numpy.linalg.cond` 比较以下同形状设计矩阵（注意它们未必同秩——`X_pred` 恰好在 Nyquist 频率处有一列 $\sin(\pi t)$ 对整数月份取值恒为 0，秩比列数少 1；这本身就是条件数比较中值得注意的一点）：
 
 - 代码块 `generate_design_matrix` 中虚拟编码的 `seasonality_all`；
 - 代码块 `gam` 中 Fourier 基函数矩阵 `X_pred`；
@@ -2633,7 +2748,7 @@ $$
         r"""
 **6H17.** 推导卡尔曼滤波方程。提示：先求 $X_t$ 与 $X_{t-1}$ 的联合分布，再求 $Y_t$ 与 $X_t$ 的联合分布。若仍有困难，参见 Särkkä 的书第 4 章 {cite:p}`sarkka2013bayesian`。
 
-**6M18.** 索引 `linear_growth_model.forward_filter` 在某个给定时间步的输出：
+**6M18.** 索引 `linear_growth_lgssm.forward_filter` 在某个给定时间步的输出：
 
 - 找出一次卡尔曼滤波步骤的输入与输出；
 - 用这些输入手工计算一次预测和更新；
