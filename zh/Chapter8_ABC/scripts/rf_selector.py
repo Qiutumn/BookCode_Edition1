@@ -197,7 +197,7 @@ def select_model(
             )
         )
         predictive = pm.sample_prior_predictive(
-            samples=int(n_samples),
+            draws=int(n_samples),
             model=model,
             var_names=[observed_name],
             return_inferencedata=True,

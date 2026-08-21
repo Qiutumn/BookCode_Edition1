@@ -664,7 +664,8 @@ cells = [
 
         其他常用选项包括 L1 范数（绝对差之和，在 PyMC 中称为 Laplace 距离）、
         L$\infty$ 范数（绝对差的最大值）以及 Mahalanobis 距离
-        $\sqrt{(x_o-x_s)^T\Sigma(x_o-x_s)}$，其中 $\Sigma$ 是协方差矩阵。
+        $\sqrt{(x_o-x_s)^T\Sigma^{-1}(x_o-x_s)}$，其中 $\Sigma$ 是协方差矩阵、
+        $\Sigma^{-1}$ 是其逆矩阵。
 
         高斯、Laplace 等距离既能作用于全部数据，也能作用于摘要统计量。还有一些距离专门
         为避免摘要统计量而提出，并仍能提供良好结果
@@ -1447,7 +1448,11 @@ cells = [
         with pm.Model() as model_ma2:
             θ1 = pm.Uniform("θ1", -2, 2)
             θ2 = pm.Uniform("θ2", -1, 1)
-            p1 = pm.Potential("p1", pm.math.switch(θ1 + θ2 > -1, 0, -np.inf))
+            # 中文版现代化说明：可逆性区域（三角形）面积恰为矩形先验支撑集面积的一半，
+            # 若只用 switch 把矩形先验截断到三角形而不补偿，截断后的“先验”只在其自身支撑集
+            # 上积分到 0.5，不是合法密度，会让 SMC 边际似然系统性偏小 log(2)。这里把补偿项
+            # np.log(2) 放在其中一个 Potential 里（只放一次，避免重复补偿）。
+            p1 = pm.Potential("p1", pm.math.switch(θ1 + θ2 > -1, np.log(2), -np.inf))
             p2 = pm.Potential("p2", pm.math.switch(θ1 - θ2 < 1, 0, -np.inf))
 
             y = pm.Simulator(
@@ -1842,7 +1847,11 @@ cells = [
         with pm.Model() as model_ma2_choice:
             θ1 = pm.Uniform("θ1", -2, 2)
             θ2 = pm.Uniform("θ2", -1, 1)
-            p1 = pm.Potential("p1", pm.math.switch(θ1 + θ2 > -1, 0, -np.inf))
+            # 中文版现代化说明：可逆性区域（三角形）面积恰为矩形先验支撑集面积的一半，
+            # 若只用 switch 把矩形先验截断到三角形而不补偿，截断后的“先验”只在其自身支撑集
+            # 上积分到 0.5，不是合法密度，会让 SMC 边际似然系统性偏小 log(2)。这里把补偿项
+            # np.log(2) 放在其中一个 Potential 里（只放一次，避免重复补偿）。
+            p1 = pm.Potential("p1", pm.math.switch(θ1 + θ2 > -1, np.log(2), -np.inf))
             p2 = pm.Potential("p2", pm.math.switch(θ1 - θ2 < 1, 0, -np.inf))
             y = pm.Simulator(
                 "y",
@@ -1859,6 +1868,26 @@ cells = [
                 cores=1,
                 random_seed=RANDOM_SEED + 52,
                 idata_kwargs={"log_likelihood": True},
+            )
+
+        # 中文版现代化说明：本章局部 select_model 用 pm.sample_prior_predictive
+        # 构造参考表，而先验预测不会应用 Potential，因此不能像上面 model_ma2_choice
+        # 那样用 Potential 实现可逆性约束（select_model 会显式拒绝带 Potential 的模型）。
+        # 这里改用等价的规范化生成式先验：先取 θ2~Uniform(-1,1)，再取
+        # θ1~Uniform(-1-θ2, 1+θ2)——这正是可逆性三角形在给定 θ2 处的截面，
+        # 因此不需要拒绝采样或 Potential 就能得到三角形上的均匀联合先验，
+        # 与 model_ma2_choice 表示同一个先验，仅参数化方式不同。
+        with pm.Model() as model_ma2_rf:
+            θ2 = pm.Uniform("θ2", -1, 1)
+            θ1 = pm.Uniform("θ1", -1 - θ2, 1 + θ2)
+            y = pm.Simulator(
+                "y",
+                moving_average_2,
+                params=[θ1, θ2],
+                distance="gaussian",
+                sum_stat=autocov,
+                epsilon=0.1,
+                observed=y_obs,
             )
         """,
         notebook_cells=(55,),
@@ -1891,7 +1920,13 @@ cells = [
                     chain_finals.append(finite[-1])
             if not chain_finals:
                 raise ValueError("没有有限的最终对数边际似然")
-            return float(np.mean(chain_finals))
+            # 中文版现代化说明：多条链各自是同一边际似然的独立估计，须在线性尺度取平均
+            # 后再取对数（log-mean-exp），而不是直接对对数值取算术平均——由 log 的凹性，
+            # 后者是几何平均，只要链间估计存在方差就会系统性偏低。
+            chain_finals = np.asarray(chain_finals, dtype=float)
+            log_count = np.log(chain_finals.size)
+            peak = np.max(chain_finals)
+            return float(peak + np.log(np.sum(np.exp(chain_finals - peak))) - log_count)
 
         log_ml_ma1 = final_log_marginal_likelihood(idata_ma1)
         log_ml_ma2 = final_log_marginal_likelihood(idata_ma2_choice)
@@ -1901,7 +1936,8 @@ cells = [
         notebook_cells=(56,),
         modernization=(
             "原 notebook 错把两个对数边际似然相除；贝叶斯因子必须取其差的指数，并先"
-            "提取每条链最后一个有限的 SMC 阶段值。"
+            "提取每条链最后一个有限的 SMC 阶段值；多链合并改用 log-mean-exp 而非对"
+            "对数值直接取算术平均，避免系统性低估。"
         ),
     ),
     _md(
@@ -1921,6 +1957,12 @@ cells = [
         原书比较结果汇总如下；它说明 MA(2) 在该次历史运行中更受偏好。当前软件版本、随机
         样本与伪逐点似然可使具体数值和排序变化，因此必须同时检查 Pareto-$k$ 警告与模型
         拟合，而不能把表中的数字当作固定基准。
+
+        > **中文版现代化说明**：这里的“逐点”是相对代码块 [MA1_abc](MA1_abc)、
+        > [MA2_abc](MA2_abc) 里 `sum_stat=autocov` 返回的 2 个滞后自协方差摘要而言，
+        > 并非原始约 100 个观测点。也就是说，`az.loo()` 在这里实际上是对 2 个摘要统计量
+        > 做留一交叉验证，而不是常规意义上逐个原始观测的 LOO；样本量极小也是 Pareto-$k$
+        > 警告和排序不稳定的部分原因，解读时应留意这一点。
 
         ```{list-table} 使用 LOO 的 ABC 模型比较摘要（原书运行）
         :name: table:abc_loo
@@ -1980,6 +2022,12 @@ cells = [
         可以不同于拟合摘要；二是展示可把有用的前两个自协方差与不太有用的其余四个混合。
         理论上 MA($q$) 最多只有前 $q$ 个非零自相关。群体遗传学等复杂问题使用几百、几千
         乃至数万个摘要并不少见 {cite:p}`Collin2020`。
+
+        > **中文版现代化说明**：`select_model` 用先验预测构造参考表，而先验预测不会
+        > 应用 `pm.Potential`；因此这里对 MA(2) 用 `model_ma2_rf`（用
+        > θ1~Uniform(-1-θ2, 1+θ2) 的规范化生成式先验表示同一个可逆性三角形），
+        > 而不是用于 SMC 拟合的 `model_ma2_choice`。两者先验相同，只是参数化方式
+        > 不同；MA(1) 的 `model_ma1` 本身没有用 Potential，可以直接复用。
         """,
         prose_lines=(1241, 1254),
     ),
@@ -1987,7 +2035,7 @@ cells = [
         "ch08-random-forest-select",
         r"""
         best_model_index, local_misclassification_probability = select_model(
-            [(model_ma1, idata_ma1), (model_ma2_choice, idata_ma2_choice)],
+            [(model_ma1, idata_ma1), (model_ma2_rf, idata_ma2_choice)],
             statistics=[autocov_6],
             n_samples=RF_REFERENCE_SAMPLES,
             n_trees=RF_TREES,
@@ -2095,11 +2143,16 @@ cells = [
         生物模型 {cite:p}`Otto2007`。猎物增加会给捕食者提供更多食物，促使捕食者增加；
         大量捕食者又会使猎物减少，食物匮乏继而使捕食者减少。在一定条件下，两类种群会
         形成稳定周期。仓库中提供了未知参数的 Lotka–Volterra 模拟器和数据集
-        `Lotka-Volterra_00`。假设未知参数均为正，用 SMC-ABC 求参数后验。
+        `Lotka-Volterra_00`（本章 `data/Lotka-Volterra_00.csv`）。假设未知参数均为正，
+        用 SMC-ABC 求参数后验。
 
         **8H11.** 继续 Lotka–Volterra 例子。`Lotka-Volterra_01` 描述的捕食者—猎物系统
         在某一时刻因疾病突然大量损失猎物。扩展模型以允许一个“切换点”，即把时间分成两种
         捕食—猎物动力学（也就是两组不同参数）的时点。
+
+        > **中文版补充**：本发行版仅包含 `Lotka-Volterra_00` 数据集；`Lotka-Volterra_01`
+        > 未随附，需要自行按题目描述模拟一段带切换点的捕食者—猎物序列（例如用
+        > 8M10 的模拟器分两段、以不同参数各生成一部分，再拼接）才能完成本题。
 
         **8H12.** 本题基于 Rasmus Bååth 提出的袜子问题。我们从洗衣物中拿出 11 只袜子，
         惊讶地发现每只都不同，无法配成一双。洗衣物中一共有多少只袜子？假设其中既有成双

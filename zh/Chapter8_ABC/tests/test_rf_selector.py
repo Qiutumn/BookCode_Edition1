@@ -28,17 +28,25 @@ SKLEARN_AVAILABLE = importlib.util.find_spec("sklearn") is not None
 class RandomForestSelectorBehaviorTests(unittest.TestCase):
     def test_selector_prefers_matching_model_and_is_deterministic(self):
         import arviz as az
+        import pymc as pm
         import xarray as xr
 
         from scripts import rf_selector
 
-        class FakeModel:
-            def __init__(self, name: str, location: float):
-                self.observed_RVs = [SimpleNamespace(name=name)]
-                self.location = location
+        # 中文版现代化说明：早先用一个只带 observed_RVs/location 属性的轻量占位对象
+        # （FakeModel）代替真实 pm.Model；但 select_model 会把它直接传给
+        # pm.sample_prior_predictive，而当前 PyMC 内部无条件访问 model.potentials，
+        # 占位对象没有这个属性就会报 AttributeError。这里改用真实的最小 pm.Model，
+        # 既满足 pm.sample_prior_predictive 的实际接口要求，也让测试更贴近真实用法；
+        # `location` 只用于 fake_posterior_predictive 里生成对应模型的伪造后验预测。
+        def make_fake_model(name: str, location: float):
+            with pm.Model() as model:
+                pm.Normal(name, mu=location, sigma=0.2, observed=np.zeros(12))
+            model.location = location
+            return model
 
-        model_0 = FakeModel("y", -3.0)
-        model_1 = FakeModel("y", 3.0)
+        model_0 = make_fake_model("y", -3.0)
+        model_1 = make_fake_model("y", 3.0)
         posterior = az.from_dict(
             posterior={"theta": np.zeros((2, 40))},
         )
