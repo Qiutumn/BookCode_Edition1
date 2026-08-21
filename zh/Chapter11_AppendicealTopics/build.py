@@ -256,10 +256,12 @@ if EXECUTION_PROFILE == "smoke":
     PIT_DRAWS, MONTE_CARLO_DRAWS, HIGHDIM_DRAWS = 2_000, 5_000, 5_000
     POSTERIOR_DRAWS, VI_STEPS, FLOW_VI_STEPS = 400, 60, 90
     VI_SAMPLE_SIZE, VI_DRAWS = 8, 512
+    HMC_DEMO_SAMPLES = 20
 else:
     PIT_DRAWS, MONTE_CARLO_DRAWS, HIGHDIM_DRAWS = 100_000, 100_000, 100_000
     POSTERIOR_DRAWS, VI_STEPS, FLOW_VI_STEPS = 2_000, 500, 800
     VI_SAMPLE_SIZE, VI_DRAWS = 32, 10_000
+    HMC_DEMO_SAMPLES = 200
 
 az.style.use("arviz-grayscale")
 plt.rcParams["figure.dpi"] = 150 if EXECUTION_PROFILE == "smoke" else 300
@@ -869,7 +871,7 @@ for idx, (dist, x_grid) in enumerate(zip(dists, xs)):
     axes[idx, 0].plot(x_grid, dist.pdf(x_grid), color="black", linewidth=2)
     axes[idx, 1].plot(
         np.sort(transformed),
-        np.linspace(0, 1, len(transformed), endpoint=False),
+        np.linspace(0, 1, len(transformed)),
         color="black",
         linewidth=2,
     )
@@ -2016,6 +2018,17 @@ normal_comparisons = [
 ]
 
 assert all({"mu", "y"}.issubset(model.named_vars) for model in normal_models)
+# 中文版补充：不只检查变量名是否存在，还实际编译并在若干点上求值每个模型的
+# logp，与手写的正态-正态解析对数密度比较，确认 PyMC 模型结构（尤其是先验/
+# 似然尺度参数）与上面用于 WAIC/LOO/边缘似然计算的解析公式完全一致。
+for model, scale in zip(normal_models, (1.0, 10.0, 100.0)):
+    compiled_logp = model.compile_logp()
+    for mu_probe in (0.0, 0.5, -0.3):
+        point = {"mu": mu_probe}
+        manual_logp = stats.norm.logpdf(mu_probe, loc=0.0, scale=scale) + float(
+            stats.norm.logpdf(normal_observations, loc=mu_probe, scale=1.0).sum()
+        )
+        assert np.isclose(compiled_logp(point), manual_logp, atol=1e-6)
 for result in normal_comparisons:
     assert result["sd"] > 0
     assert np.isfinite([result["log_marginal"], result["waic"], result["loo"]]).all()
@@ -2024,7 +2037,7 @@ assert normal_comparisons[0]["log_marginal"] > normal_comparisons[-1]["log_margi
 """,
     "2523-2600",
     migration_cells=(21, 22),
-    modernization="迁移为 PyMC 5 模型构造和 ArviZ 公共 waic/loo API；用共轭解析后验确定性抽样，修正多观测共享均值模型的边缘似然协方差，完全避免 MCMC。",
+    modernization="迁移为 PyMC 5 模型构造和 ArviZ 公共 waic/loo API；用共轭解析后验确定性抽样，修正多观测共享均值模型的边缘似然协方差，完全避免 MCMC；另外实际编译各模型 logp 并与手写解析对数密度比对，而不只检查变量是否存在。",
     tags=("model-construction", "no-mcmc"),
 )
 
@@ -2541,6 +2554,33 @@ def hamiltonian_monte_carlo(
     tags=("definition-only", "no-validation-execution"),
 )
 
+add_code(
+    "hamiltonian-monte-carlo-demo",
+    r"""
+# 中文版补充：教学版 hamiltonian_monte_carlo 此前只定义、从未实际运行；这里用与
+# leapfrog 演示相同的标准二维正态目标（负对数概率 0.5*q@q，梯度 q）轻量运行几步，
+# 展示函数确实可用，而不只是停留在定义阶段。样本数按 smoke/release 预算区分，
+# 但两种配置走同一条代码路径。
+hmc_demo_samples, hmc_demo_accept_rate = hamiltonian_monte_carlo(
+    n_samples=HMC_DEMO_SAMPLES,
+    negative_log_prob=lambda q: 0.5 * float(q @ q),
+    gradient_potential=lambda q: q,
+    initial_position=np.array([0.4, -0.7]),
+    path_length=0.5,
+    step_size=0.05,
+)
+assert hmc_demo_samples.shape == (HMC_DEMO_SAMPLES, 2)
+assert np.all(np.isfinite(hmc_demo_samples))
+assert 0.0 <= hmc_demo_accept_rate <= 1.0
+print(f"教学版 HMC 接受率：{hmc_demo_accept_rate:.2f}")
+""",
+    "中文版补充：hamiltonian_monte_carlo 的最小可运行演示",
+    labels=("hamiltonian_mc_demo",),
+    provenance="addition",
+    modernization="新增对 hamiltonian_monte_carlo 的实际调用，验证函数可运行而不只是定义。",
+    tags=("lightweight-check",),
+)
+
 add_md(
     "hmc-trajectories-tuning",
     r"""
@@ -2768,9 +2808,12 @@ add_md(
     "tfp-vi-result",
     r"""
 ![用变分推断近似二维香蕉形目标密度。左图是均值场高斯：每一维各有可训练位置和尺度；右图是具有可训练均值与完整协方差的二维满秩高斯 {cite:p}`kucukelbir2016automatic`。点表示优化后的近似样本，等高线表示目标。两者都不能完整捕捉弯曲形状，但满秩高斯凭借更丰富结构通常更接近目标。](img/vi_in_tfp.png)
+
+> **中文版现代化说明。** 上图是原书哈希锁定的静态资源，由已废弃的私有 `tfp.experimental.vi` 构造器生成；本章上方 `tfp-public-surrogates`/`tfp-fit-gaussian-surrogates` 单元格改用公开 API 重新实现了等价的均值场/满秩高斯拟合，并已通过独立断言验证收敛。两者定性结论一致（满秩高斯通常更贴合弯曲目标），但优化轨迹的随机性来源不同，实际重新运行代码得到的散点位置不会与静态图逐点相同。
 """,
     "3494-3509",
     labels=("fig:vi_in_tfp",),
+    modernization="补充说明：静态图仍来自原书私有 API 输出，与上方已迁移到公开 API 的代码定性一致但不逐点相同。",
 )
 
 add_md(
