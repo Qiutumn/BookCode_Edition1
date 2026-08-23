@@ -166,3 +166,29 @@ downgraded `numpy` 2.5.2->2.4.6 and `llvmlite` 0.49.0->0.47.0 to find a
 self-consistent combination satisfying its own unrelated, hand-resolved
 transitive chain. Both the CI workflow and this file's install recipe now
 reflect the corrected sequence.
+
+**CI results after both fixes (2026-08-23), and a revised diagnosis for
+Chapter 6.** With the install fixed, a `workflow_dispatch` release-check
+run on `ubuntu-latest` completed 15 of 16 units successfully:
+
+- **Chapter 7 is confirmed fixed by CI's native compilation**, as
+  predicted above -- the `m=200` BART interaction-model cell that
+  reproducibly timed out on this host's `FAST_COMPILE` fallback completed
+  without issue on a runner with native PyTensor compilation. This closes
+  out Chapter 7's known limitation; it was purely a compilation-speed
+  artifact of this local host, not a content defect.
+- **Chapter 6 still fails on CI, on the exact same cell** as this local
+  host (`ch06-gam-with-latent-ar-errors`'s `gam_latent_ar_model` fit,
+  `CellTimeoutError` after 1200s). This revises the earlier diagnosis: it
+  is *not* purely a local-host compilation-speed artifact the way Chapter
+  7 was, because CI's native compilation didn't help. TFP's `windowed_
+  adaptive_nuts` in eager/non-JIT mode (mandatory here -- see the
+  `jit_compile=True` XLA failure documented above) is simply expensive
+  enough, at this chapter's release-scale budget (1000 draws x 4 chains),
+  that 1200s is not enough regardless of the host's compiler backend. This
+  is a genuine compute-cost characteristic of the model at release scale,
+  not a bug to fix in code -- resolving it would mean either accepting a
+  longer timeout for this one cell/unit, or reducing this model's
+  release-scale draws/chains specifically, both of which are content-scope
+  tradeoffs rather than something to change unilaterally. Chapter 6's live
+  `.ipynb`/`.org` remain unpromoted pending that decision.
