@@ -118,18 +118,35 @@ jobs:
           # wheel below 0.59 and conflicts with numpy==2.5.2 on every 0.59-
           # 0.65.1 release -- a normal resolve of the full stack in one pass
           # walks that range down to a source-only build that fails outright
-          # on 3.12. Nothing in this project uses PyTensor's numba backend
-          # (see zh/environments/system-dependencies.md), so pre-installing
-          # the verified numba/llvmlite pair normally, then PyTensor with
-          # --no-deps to skip re-checking that bound, avoids the walk before
-          # the rest of the stack resolves its other dependencies normally.
+          # on 3.12. pymc similarly declares cachetools<7. Nothing in this
+          # project uses PyTensor's numba backend (see
+          # zh/environments/system-dependencies.md), so pytensor and pymc
+          # are installed together with --no-deps (after numba/llvmlite
+          # resolve normally) to skip re-checking those bounds; their own
+          # actual runtime dependencies (everything except numba/llvmlite)
+          # are pinned in pymc-extras.lock.txt and installed normally
+          # alongside core.lock.txt/pymc.lock.txt/tfp.lock.txt. The optional
+          # bart/ml/ppl groups each declare unrelated, hand-resolved
+          # transitive versions (see their lock file headers), so each is
+          # installed with its own separate --no-deps pass rather than
+          # folded into the normal resolve, which would otherwise let their
+          # solvers "fix" numpy/numba/llvmlite by silently downgrading them.
           python -m pip install numba==0.67.0 llvmlite==0.49.0
-          python -m pip install --no-deps pytensor==2.38.3
-          args="-r zh/environments/core.lock.txt"
+          python -m pip install --no-deps -r zh/environments/pytensor-pymc.lock.txt
+          args="-r zh/environments/core.lock.txt -r zh/environments/pymc.lock.txt -r zh/environments/pymc-extras.lock.txt"
+          nodeps_groups=""
           for group in ${{ matrix.environment }}; do
-            args="$args -r zh/environments/$group.lock.txt"
+            case "$group" in
+              pymc) ;;
+              tfp) args="$args -r zh/environments/tfp.lock.txt" ;;
+              bart|ml|ppl) nodeps_groups="$nodeps_groups $group" ;;
+              *) echo "unknown environment group: $group" >&2; exit 1 ;;
+            esac
           done
           python -m pip install $args
+          for group in $nodeps_groups; do
+            python -m pip install --no-deps -r "zh/environments/$group.lock.txt"
+          done
           python -m pip check
       - name: Execute staged smoke build
         run: >-
@@ -198,15 +215,26 @@ jobs:
             zh/environments/*.lock.txt
       - name: Install release stack
         run: |
-          # See the smoke job's "Install execution stack" step for why numba
-          # and PyTensor are staged separately before the rest of the stack.
+          # See the smoke job's "Install execution stack" step for why
+          # pytensor/pymc are staged separately (--no-deps) from the rest
+          # of the stack, and why bart/ml/ppl each get their own --no-deps
+          # pass instead of being folded into the normal resolve.
           python -m pip install numba==0.67.0 llvmlite==0.49.0
-          python -m pip install --no-deps pytensor==2.38.3
-          args="-r zh/environments/core.lock.txt"
+          python -m pip install --no-deps -r zh/environments/pytensor-pymc.lock.txt
+          args="-r zh/environments/core.lock.txt -r zh/environments/pymc.lock.txt -r zh/environments/pymc-extras.lock.txt"
+          nodeps_groups=""
           for group in ${{ matrix.environment }}; do
-            args="$args -r zh/environments/$group.lock.txt"
+            case "$group" in
+              pymc) ;;
+              tfp) args="$args -r zh/environments/tfp.lock.txt" ;;
+              bart|ml|ppl) nodeps_groups="$nodeps_groups $group" ;;
+              *) echo "unknown environment group: $group" >&2; exit 1 ;;
+            esac
           done
           python -m pip install $args
+          for group in $nodeps_groups; do
+            python -m pip install --no-deps -r "zh/environments/$group.lock.txt"
+          done
           python -m pip check
       - name: Execute staged release check
         run: >-

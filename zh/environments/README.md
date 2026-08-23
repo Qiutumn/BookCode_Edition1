@@ -4,7 +4,14 @@ The files in this directory are grouped by execution stack rather than by a
 single global freeze.
 
 - `core.in` / `core.lock.txt`: notebook validation, execution, and conversion.
-- `pymc.in` / `pymc.lock.txt`: the verified PyMC scientific stack.
+- `pymc.in` / `pymc.lock.txt`: the verified PyMC scientific stack (numpy,
+  scipy, pandas, matplotlib, arviz, xarray, statsmodels, graphviz -- pymc
+  itself lives in `pytensor-pymc.lock.txt` below).
+- `pytensor-pymc.lock.txt`: `pytensor`/`pymc` themselves, installed together
+  with `--no-deps` (see the install recipe below for why).
+- `pymc-extras.lock.txt`: `pytensor`'s and `pymc`'s own actual runtime
+  dependencies (minus numba/llvmlite), installed normally alongside
+  `core.lock.txt`/`pymc.lock.txt`.
 - `tfp.in` / `tfp.lock.txt`: the verified TensorFlow Probability stack.
 - `bart.in` / `bart.lock.txt`: Chapter 7's PyMC-BART extension
   (`pymc-bart==0.11.0` plus `arviz-stats`/`arviz-base`). Verified on
@@ -37,23 +44,34 @@ versions, not a fabricated transitive resolution. Install the required groups
 in a clean Python 3.12 environment, record the platform, and run:
 
 ```sh
-# PyTensor 2.38.x declares numba<=0.65.1, which has no Python 3.12 wheel
-# below 0.59 and conflicts with numpy==2.5.2 across the whole 0.59-0.65.1
-# range -- a normal resolve of the full stack in one pass walks that range
-# down to a source-only build that fails outright on 3.12. Nothing in this
+# PyTensor 2.38.x declares numba<=0.65.1 (no Python 3.12 wheel below 0.59,
+# and conflicts with numpy==2.5.2 across the whole 0.59-0.65.1 range), and
+# pymc declares cachetools<7. A normal resolve of the full stack in one
+# pass tries to "fix" both bounds: for numba this walks down to a
+# source-only build that fails outright on 3.12; for cachetools it silently
+# downgrades an already-verified-compatible version. Nothing in this
 # project uses PyTensor's numba backend (see system-dependencies.md), so
-# stage the verified numba/llvmlite pair first, then PyTensor with --no-deps
-# to skip re-checking that bound, before resolving everything else normally.
+# stage the verified numba/llvmlite pair first, then install pytensor and
+# pymc together with --no-deps to skip re-checking those bounds. Their own
+# actual runtime dependencies (everything except numba/llvmlite) are pinned
+# in pymc-extras.lock.txt and installed normally alongside
+# core.lock.txt/pymc.lock.txt in the same pass.
 python -m pip install numba==0.67.0 llvmlite==0.49.0
-python -m pip install --no-deps pytensor==2.38.3
-python -m pip install -r zh/environments/core.lock.txt -r zh/environments/pymc.lock.txt  # add tfp/bart/ml/ppl as needed
+python -m pip install --no-deps -r zh/environments/pytensor-pymc.lock.txt
+python -m pip install -r zh/environments/core.lock.txt -r zh/environments/pymc.lock.txt -r zh/environments/pymc-extras.lock.txt  # add tfp.lock.txt as needed
 python -m pip check
 ```
 
 Optional groups (`bart`, `ml`, `ppl`) declare their own top-level packages
 with real version pins but were resolved by hand rather than by a plain
-`pip install -r *.in`; install their `*.lock.txt` with `--no-deps` (each file
-says exactly what it needs beyond what `core`/`pymc`/`tfp` already provide).
+`pip install -r *.in`; install each of their `*.lock.txt` with its own
+separate `--no-deps` pass (never folded into the normal-resolve command
+above) -- each file says exactly what it needs beyond what
+`core`/`pymc`/`tfp` already provide. Folding one into the normal pass lets
+its own solver "fix" numpy/numba/llvmlite by silently downgrading them to
+satisfy its unrelated, hand-resolved transitive chain (confirmed: asking
+pip to resolve `pymc-bart` normally downgrades numpy 2.5.2->2.4.6 and
+llvmlite 0.49.0->0.47.0 to find a self-consistent combination).
 
 A chapter release must not use an unresolved optional input. Resolve it on
 the target CPU/GPU platform, pin versions that actually install, add a

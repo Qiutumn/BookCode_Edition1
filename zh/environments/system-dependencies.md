@@ -120,3 +120,49 @@ isolation. Chapter 6 remains in `book.toml`'s `smoke`/`release` profiles
 and the CI matrix (CI runners have more headroom and, on `ubuntu-latest`,
 native PyTensor/XLA compilation rather than this host's `FAST_COMPILE`
 fallback); its live `.ipynb`/`.org` were not promoted from this host.
+
+**A second, previously undetected install-order bug, caught by an actual CI
+run.** After the numba/pytensor staged-install fix above (2026-08-21) was
+believed sufficient and had been working correctly on this local host, a
+`workflow_dispatch` run of the release-check matrix on `ubuntu-latest`
+(2026-08-23) failed on every single unit, including trivial ones like
+`dedication` -- a strong signal the bug was in the shared install step, not
+per-chapter content. The install log showed `pip` trying to build
+`numba==0.58.1` from source and hitting the same `RuntimeError: Cannot
+install on Python version 3.12.14; only versions >=3.8,<3.12 are
+supported.` as the original bug. Root cause: the CI script's final combined
+step (`pip install -r core.lock.txt -r pymc.lock.txt ...`) was never given
+`--no-deps`, so pip's resolver still walked into `pytensor`'s declared
+`numba<=0.65.1` bound while resolving `pymc` (which depends on `pytensor`)
+-- even though `pytensor` itself had already been installed correctly with
+`--no-deps` in the step before. This had gone undetected locally because
+this host's actual working `.venv` was never rebuilt from scratch with the
+literal documented command sequence; it had accreted its correct state
+through a different, more manual sequence of commands over the session.
+Lesson: a documented install recipe is unverified until it has actually
+been run start-to-finish in a genuinely fresh environment.
+
+Separately, `pymc` itself declares `cachetools<7`, which has the same
+"pip silently downgrades an already-good package" failure mode as the
+`numba` bound (confirmed by reproduction: an unconstrained `pip install
+cachetools` alongside this stack resolves to `7.1.7`, which then fails
+`pip check` against `pymc`'s stated ceiling).
+
+The fix (verified in a genuinely fresh `python -m venv --without-pip` +
+`get-pip.py` environment, matching CI's actual conditions): `pytensor` and
+`pymc` are now installed together with `--no-deps` in one step
+(`pytensor-pymc.lock.txt`), and their own actual runtime dependencies --
+everything they need except numba/llvmlite -- are pinned explicitly in the
+new `pymc-extras.lock.txt` and installed normally in the same pass as
+`core.lock.txt`/`pymc.lock.txt` (`pymc.lock.txt` no longer lists `pymc`
+itself). The resulting environment's `python -m pip check` reports exactly
+one line -- the intentionally accepted `numba` version mismatch -- matching
+this host's known-good `.venv` exactly. This also surfaced, by direct
+reproduction, why the optional `bart`/`ml`/`ppl` groups must each be
+installed in their own separate `--no-deps` pass rather than folded into
+the same combined command as `core`/`pymc`/`tfp`: asking pip to resolve
+`pymc-bart` normally (with everything else already installed) silently
+downgraded `numpy` 2.5.2->2.4.6 and `llvmlite` 0.49.0->0.47.0 to find a
+self-consistent combination satisfying its own unrelated, hand-resolved
+transitive chain. Both the CI workflow and this file's install recipe now
+reflect the corrected sequence.

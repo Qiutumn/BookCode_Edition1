@@ -93,11 +93,16 @@ Notebook 由 `nbclient` 在对应章目录中执行，因此代码中的 `data/.
   单元仍无法执行。
 
 `core`/`pymc`/`tfp`/`bart`/`ml`/`ppl` 安装时务必按 `environments/README.md`
-给出的顺序执行（先固定 `numba`/`llvmlite`，再以 `--no-deps` 安装
-`pytensor`，然后再装其余锁定文件），否则 PyTensor 2.38.x 对 `numba` 的
-过严声明（`<=0.65.1`）会让 pip 把 `numba` 一路回退到没有 Python 3.12 轮子
-的旧版本，导致安装彻底失败——这不是本项目引入的问题，而是该依赖链本身
-在全新环境下的既有缺陷。
+给出的顺序执行（先固定 `numba`/`llvmlite`，再以 `--no-deps` 一起安装
+`pytensor-pymc.lock.txt`（`pytensor`+`pymc`），然后正常安装
+`core`/`pymc`/`pymc-extras`/`tfp` 锁定文件），否则 PyTensor 2.38.x 对
+`numba` 的过严声明（`<=0.65.1`）、以及 pymc 对 `cachetools`（`<7`）的声明，
+会让 pip 把这两个包一路回退/降级——`numba` 会退到没有 Python 3.12 轮子
+的旧版本导致安装彻底失败，`cachetools` 则会被静默降级——这不是本项目
+引入的问题，而是该依赖链本身在全新环境下的既有缺陷。`bart`/`ml`/`ppl`
+这三个可选组各自必须单独执行一次 `--no-deps` 安装，不能与上面的正常安装
+合并成一条命令——合并会让它们各自的求解器为了满足自己的传递依赖，悄悄把
+`numpy`/`numba`/`llvmlite` 降级（已实测确认）。
 
 默认 `requirements.txt` 只组合 `core` 与 `pymc` 直接依赖，用于最小化安装第
 1–2 章。精确版本来自 2026-08-20（`bart`/`ml`/`ppl` 为 2026-08-21）的

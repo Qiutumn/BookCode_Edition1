@@ -1,0 +1,18 @@
+# Verified top-level lock input, Python 3.12.3, 2026-08-23.
+# pytensor's and pymc's own actual runtime dependencies, minus numba/
+# llvmlite (staged separately -- see pytensor-pymc.lock.txt and
+# system-dependencies.md for why pytensor/pymc are installed --no-deps).
+# Install normally, in the same pass as core.lock.txt/pymc.lock.txt; none
+# of these declare a bound that conflicts with the rest of the pinned
+# stack. cachetools in particular must stay below pymc's <7 ceiling.
+cachetools==6.2.6
+cloudpickle==3.1.2
+rich==15.0.0
+threadpoolctl==3.6.0
+typing-extensions==4.16.0
+cons==0.4.7
+etuples==0.3.10
+filelock==3.32.3
+logical-unification==0.4.7
+miniKanren==1.0.5
+setuptools==84.0.0

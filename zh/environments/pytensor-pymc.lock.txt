@@ -1,0 +1,14 @@
+# Verified top-level lock input, Python 3.12.3, 2026-08-23.
+# Install with --no-deps, after numba/llvmlite (see system-dependencies.md):
+# pytensor declares numba<=0.65.1,>=0.58, and pymc declares cachetools<7 --
+# both bounds a normal resolve would "fix" by downgrading an
+# already-verified-compatible package (numba==0.67.0), which for pytensor
+# specifically walks down to a numba version with no Python 3.12 wheel and
+# fails to build from source. Nothing in this project uses PyTensor's numba
+# backend, so the newer numba is fine in practice; `pip check` will report
+# exactly this one accepted mismatch and nothing else.
+# Their own actual runtime dependencies (everything except numba/llvmlite)
+# are pinned in pymc-extras.lock.txt and installed normally in the same
+# pass as core.lock.txt/pymc.lock.txt.
+pytensor==2.38.3
+pymc==5.28.5
