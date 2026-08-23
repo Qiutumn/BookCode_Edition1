@@ -1,0 +1,7 @@
+        rank     elpd_loo      p_loo   elpd_diff  weight         se      dse  \
+gumbel     0 -1410.199127   5.634218    0.000000     1.0  45.104189   0.0000   
+normal     1 -1653.027195  21.390836  242.828068     0.0  64.845384  27.2155   
+
+        warning scale  
+gumbel    False   log  
+normal     True   log  

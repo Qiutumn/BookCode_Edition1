@@ -363,12 +363,21 @@ def release_resources(*names: str) -> None:
     gc.collect()
 
 
-def run_windowed_nuts(model, *, seed, **pins):
-    '''用一致的 smoke/release 预算运行 TFP 的公共自适应 NUTS。'''
+def run_windowed_nuts(model, *, seed, jit_compile=False, **pins):
+    '''用一致的 smoke/release 预算运行 TFP 的公共自适应 NUTS。
+
+    中文版现代化说明：默认 jit_compile=False，因为本章几个模型内部用
+    LinearGaussianStateSpaceModel（latent-AR、ARMA、BSTS）构造，其卡尔曼
+    滤波递推依赖动态长度的 TensorArray/while_loop，XLA 编译会报错
+    "XLA compilation requires a fixed tensor list size"——这是已验证的
+    硬性限制，不是本地环境问题。不含 LGSSM 的模型（如下方 GAM）经验证在
+    jit_compile=True 下结果一致，且在缺少 PyTensor/TF 原生加速的宿主上快
+    约 4 倍（356s → 90s，相同 smoke 预算），因此按调用点显式开启。
+    '''
     sampler = tf.function(
         tfp.experimental.mcmc.windowed_adaptive_nuts,
         autograph=False,
-        jit_compile=False,
+        jit_compile=jit_compile,
     )
     return sampler(
         BUDGET["draws"],
@@ -1011,9 +1020,12 @@ ax.legend(frameon=False)
     code(
         "ch06-gam-inference-and-forecast",
         r"""
+# 中文版现代化说明：gam_model 不含 LinearGaussianStateSpaceModel，已验证可用
+# jit_compile=True；相同 smoke 预算下比默认 jit_compile=False 快约 4 倍。
 gam_draws, gam_stats = run_windowed_nuts(
     gam_model,
     seed=split_seed("gam-mcmc")[0],
+    jit_compile=True,
     observed=tf.convert_to_tensor(co2_training["CO2"].to_numpy(), tf.float32),
 )
 gam_idata = tfp_draws_to_idata(gam_draws, gam_stats)

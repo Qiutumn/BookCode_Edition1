@@ -1,0 +1,8 @@
+# Verified top-level lock input, Python 3.12.3, 2026-08-21.
+# Install after core.lock.txt and pymc.lock.txt, then run `python -m pip check`.
+# scikit-learn's own dependency resolution is not what was verified here;
+# install with --no-deps and let joblib/narwhals come from this file (their
+# threadpoolctl dependency is already satisfied by pymc.lock.txt).
+scikit-learn==1.9.0
+joblib==1.5.3
+narwhals==2.25.0

@@ -1,0 +1,17 @@
+                mean      sd  hdi_3%  hdi_97%  mcse_mean  mcse_sd  ess_bulk  \
+β[Pizza]      13.046   0.030  12.986   13.094      0.006    0.006      19.0   
+β[Sandwich]    5.941   0.103   5.838    6.005      0.020    0.033      26.0   
+β[Salad]       8.113   0.776   6.964    9.016      0.548    0.098       2.0   
+σ[Pizza]      40.655   1.859  37.935   44.514      0.364    0.473      26.0   
+σ[Sandwich]   41.558   4.901  35.063   48.282      1.921    1.385      10.0   
+σ[Salad]      57.722  10.860  41.106   74.737      2.638    1.310      16.0   
+σ_hyperprior  40.638  12.708  26.078   66.297      6.538    3.078       5.0   
+
+              ess_tail  r_hat  
+β[Pizza]          20.0    NaN  
+β[Sandwich]       20.0    NaN  
+β[Salad]          26.0    NaN  
+σ[Pizza]          26.0    NaN  
+σ[Sandwich]       20.0    NaN  
+σ[Salad]          26.0    NaN  
+σ_hyperprior      20.0    NaN  

@@ -1,0 +1,11 @@
+# Verified top-level lock input, Python 3.12.3, 2026-08-21.
+# Install after core.lock.txt, pymc.lock.txt, and tfp.lock.txt, then run
+# `python -m pip check`. Install jax/jaxlib/numpyro with --no-deps if your
+# resolver tries to change numpy/pymc/pytensor/tensorflow-probability, since
+# their own transitive resolution is not what was verified here. tqdm is
+# numpyro's only additional runtime dependency beyond what pymc.lock.txt and
+# tfp.lock.txt already provide.
+jax==0.4.38
+jaxlib==0.4.38
+numpyro==0.17.0
+tqdm==4.70.0

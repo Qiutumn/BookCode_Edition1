@@ -1,0 +1,9 @@
+              profile  rank    elpd_loo      p_loo   elpd_diff    weight  \
+sp_global       smoke     0 -321.608336  24.998357    0.000000  0.966075   
+sp_mix          smoke     1 -406.493298  94.204909   84.884962  0.000000   
+sp_individual   smoke     2 -462.541679   0.828650  140.933343  0.033925   
+
+                      se        dse  warning  max_pareto_k  pareto_k_cutoff  
+sp_global       9.810505   0.000000     True           inf         0.231378  
+sp_mix         10.538188  12.251381     True           inf         0.231378  
+sp_individual  11.645950  15.040322     True           inf         0.231378  

@@ -1,4 +1,4 @@
-#+TITLE: 用 Python 做贝叶斯建模与计算 — 第2章 贝叶斯模型的探索性分析
+#+TITLE: 第二章：贝叶斯模型的探索性分析
 #+LANGUAGE: zh-CN
 #+OPTIONS: toc:3 num:2
 #+STARTUP: showall
@@ -60,12 +60,12 @@ EDA 中的很多思想可以被借用、重新诠释,并拓展成一套稳健的
 *先验预测检验(prior predictive checks)*。
 
 假设我们想为足球(美国人叫 soccer)建一个模型,具体来说是想搞清楚点球命中的概率。想了一会儿
-之后,我们决定用一个几何模型 [^4]。参照罚点球的示意图,再加上一点三角学知识,可以得到如下
+之后,我们决定用一个几何模型 [fn:4]。参照罚点球的示意图,再加上一点三角学知识,可以得到如下
 命中概率公式:
 
-$$
+\[
 p\left(|\alpha| < \tan^{-1}\left(\frac{L}{x}\right)\right) = 2\Phi\left(\frac{\tan^{-1}\left(\frac{L}{x}\right)}{\sigma}\right) - 1
-$$
+\]
 
 这个公式背后的直觉是:我们假设进球概率,由角度 $\alpha$ 的绝对值小于某个阈值
 $\tan^{-1}\left(\frac{L}{x}\right)$ 的概率给出。此外我们假设球员本来是想把球笔直踢出去,
@@ -75,13 +75,13 @@ $\tan^{-1}\left(\frac{L}{x}\right)$ 的概率给出。此外我们假设球员�
 公式中唯一未知的量是 $\sigma$。$L$ 和 $x$ 可以直接从足球规则中获得。身为优秀的贝叶斯主义者,
 遇到未知量,我们就给它指定一个先验,然后尝试搭建一个贝叶斯模型,比如可以这样写:
 
-$$
+\[
 \begin{split}
 \sigma &\sim \mathcal{HN}(\sigma_{\sigma}) \\
 \text{p\_goal} &= 2\Phi\left(\frac{\tan^{-1}\left(\frac{L}{x}\right)}{\sigma}\right) - 1 \\
 Y &\sim \text{Bin}(n=1, p=\text{p\_goal})
 \end{split}
-$$
+\]
 
 这时候我们还不确定这个模型对足球领域知识的编码效果如何,于是决定先从先验预测分布中采样,
 获得一些直观感受。下图展示了 3 种先验(即 $\sigma_{\sigma}$ 分别取 5、20、60 度)对应的结果。
@@ -89,22 +89,37 @@ $$
 范围。我们可以看到,即便球员踢出的角度比灰色区域更大,模型依然认为有可能进球。有意思的是,
 当 $\sigma_{\sigma}$ 较大时,模型甚至认为往反方向踢也不是太糟糕的主意。
 
-
+#+NAME: ch02-code-25606749149d86af
 #+BEGIN_SRC python
 %matplotlib inline
+import os
+
 import arviz as az
 import matplotlib.pyplot as plt
 import numpy as np
 import pymc as pm
 from scipy import stats
+
+EXECUTION_PROFILE = os.environ.get("BMCP_EXECUTION_PROFILE", "release").lower()
+if EXECUTION_PROFILE not in {"smoke", "release"}:
+    raise ValueError("BMCP_EXECUTION_PROFILE 必须是 smoke 或 release")
+if EXECUTION_PROFILE == "smoke":
+    DRAWS, TUNE, CHAINS, PREDICTIVE_SAMPLES = 100, 100, 2, 200
+    DIAGNOSTIC_TUNE = 300
+else:
+    DRAWS, TUNE, CHAINS, PREDICTIVE_SAMPLES = 1000, 1000, 4, 1000
+    DIAGNOSTIC_TUNE = 1500
+RANDOM_SEED = 521
 #+END_SRC
 
+#+NAME: ch02-code-c224ec9d542c1799
 #+BEGIN_SRC python
 az.style.use("arviz-grayscale")
 plt.rcParams['figure.dpi'] = 300
 np.random.seed(5201)
 #+END_SRC
 
+#+NAME: ch02-code-f1df5f006fc75a0a
 #+BEGIN_SRC python
 half_length = 3.66  # 米,球门宽度的一半
 penalty_point = 11  # 米,点球点到球门线的距离
@@ -123,10 +138,24 @@ for sigma in sigmas_rad:
         # 用 pm.Deterministic 把"角度 -> 进球概率"这一变换记录进模型,
         # 这样它的值也会随先验/后验样本一起被保存下来
         p_goal = pm.Deterministic("p_goal", 2 * Phi(pm.math.arctan(half_length / penalty_point) / σ) - 1)
-        pps = pm.sample_prior_predictive(250)
+        pps = pm.sample_prior_predictive(
+            min(PREDICTIVE_SAMPLES, 250), random_seed=RANDOM_SEED)
         ppss.append(pps)
 #+END_SRC
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sampling: [α, σ]
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sampling: [α, σ]
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sampling: [α, σ]
+#+END_EXAMPLE
 
+#+NAME: ch02-code-45a2834be02a1223
 #+BEGIN_SRC python
 fig, axes = plt.subplots(1, 3, subplot_kw=dict(projection="polar"), figsize=(10, 4))
 
@@ -139,13 +168,13 @@ for sigma, pps, ax in zip(sigmas_deg, ppss, axes):
                marker=".", cmap="viridis_r", vmin=0.1)
     ax.fill_between(np.linspace(-max_angle, max_angle, 100), 0, 1.01, alpha=0.25)
     ax.set_yticks([])
-    ax.set_title(f"$\sigma = \mathcal{{HN}}({sigma})$")
+    ax.set_title(fr"$\sigma = \mathcal{{HN}}({sigma})$")
     ax.plot(0,0, 'o')
 fig.colorbar(cax, extend="min", ticks=[1, 0.5, 0.1], shrink=0.7, aspect=40)
 
 plt.savefig("img/chp02/prior_predictive_distributions_00.png", bbox_inches="tight")
 #+END_SRC
-[[file:Ch2_ExploratoryAnalysis_zh_files/ch2_004_0.png]]
+[[file:generated/chapter-2-93b35cf98b-ch02-code-45a2834be02a1223-43c75b2c75-figure.png]]
 
 
 到这一步,我们有几种选择:可以重新思考模型,纳入更多几何学上的考量;也可以换一个能降低出现
@@ -156,7 +185,7 @@ plt.savefig("img/chp02/prior_predictive_distributions_00.png", bbox_inches="tigh
 一幅图)。这个例子告诉我们:随着预测变量数量增多,由此诱导出的先验预测分布会把更多概率质量
 堆积到极端值上。因此我们需要更强的正则化先验(例如拉普拉斯分布),才能让模型远离这些极端值。
 
-
+#+NAME: ch02-code-922d880020a0286f
 #+BEGIN_SRC python
 from scipy.special import expit
 fig, axes = plt.subplots(1, 3, figsize=(10, 4), sharex=True,  sharey=True)
@@ -173,7 +202,7 @@ for dim, ax in zip([2, 5, 20], axes):
 fig.text(0.34, -0.075, size=18, s="mean of the simulated data")
 plt.savefig("img/chp02/prior_predictive_distributions_01.png", bbox_inches="tight")
 #+END_SRC
-[[file:Ch2_ExploratoryAnalysis_zh_files/ch2_006_0.png]]
+[[file:generated/chapter-2-93b35cf98b-ch02-code-922d880020a0286f-6739b0f61e-figure.png]]
 
 
 这两个例子都说明,先验不能脱离具体模型来孤立地理解,我们需要把先验放在特定模型的语境中来看。
@@ -199,21 +228,68 @@ plt.savefig("img/chp02/prior_predictive_distributions_01.png", bbox_inches="tigh
 在直接为二项分布的均值建模。在后面的章节里,我们会看到后验预测检验揭示出不那么显而易见、
 因而也更有价值的模型拟合信息的例子。
 
-
+#+NAME: ch02-code-4dfa77c3467d38e9
 #+BEGIN_SRC python
 Y = stats.bernoulli(0.7).rvs(100)
 with pm.Model() as model:
     θ = pm.Beta("θ", 1, 1)
     y_obs = pm.Binomial("y_obs",n=1, p=θ, observed=Y)
-    idata_b = pm.sample(1000)
-    idata_b.extend(pm.sample_posterior_predictive(idata_b))
+    idata_b = pm.sample(
+        draws=DRAWS, tune=TUNE, chains=CHAINS, cores=1,
+        random_seed=RANDOM_SEED)
+    idata_b.extend(pm.sample_posterior_predictive(
+        idata_b, random_seed=RANDOM_SEED))
 #+END_SRC
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Initializing NUTS using jitter+adapt_diag...
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sequential sampling (4 chains in 1 job)
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+NUTS: [θ]
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+Output()
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
 
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 34 seconds.
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sampling: [y_obs]
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+Output()
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+
+#+END_EXAMPLE
+
+#+NAME: ch02-code-12b27b78e296472a
 #+BEGIN_SRC python
-pred_dist = az.extract(idata_b, group="posterior_predictive", num_samples=1000)["y_obs"].values
+pred_dist = az.extract(
+    idata_b, group="posterior_predictive", num_samples=PREDICTIVE_SAMPLES,
+    rng=RANDOM_SEED)["y_obs"].values
 pred_dist.sum(0).shape
 #+END_SRC
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+(1000,)
+#+END_EXAMPLE
 
+#+NAME: ch02-code-da1997ce8d05c1c2
 #+BEGIN_SRC python
 _, ax = plt.subplots(1, 2, figsize=(12, 4), constrained_layout=True)
 
@@ -234,14 +310,14 @@ ax[1].set_xlabel("observed values")
 ax[1].set_ylabel("probability")
 plt.savefig("img/chp02/posterior_predictive_check.png")
 #+END_SRC
-[[file:Ch2_ExploratoryAnalysis_zh_files/ch2_010_0.png]]
+[[file:generated/chapter-2-93b35cf98b-ch02-code-da1997ce8d05c1c2-85cb0bf3ac-figure.png]]
 
 
 后验预测检验并不局限于画图,我们也可以做数值检验。一种做法是计算:
 
-$$
+\[
 p_{B} = p(T_{sim} \leq T_{obs} \mid \tilde Y)
-$$
+\]
 
 这里 $p_{B}$ 被称为*贝叶斯 p 值*,定义为"模拟出的检验统计量 $T_{sim}$ 小于等于观测统计量
 $T_{obs}$"这一事件的概率。统计量 $T$ 基本上可以是我们想用来评估模型拟合数据程度的任何指标。
@@ -250,7 +326,7 @@ $T_{sim}$ 做比较。理想情况下 $p_{B}=0.5$,意味着算出的 $T_{sim}$ �
 统计量 $T_{obs}$ 之下、一半时间落在其上——这正是模型拟合良好时我们期望看到的结果。
 
 由于我们钟爱画图,贝叶斯 p 值当然也可以画出来。下图第一幅子图展示了贝叶斯 p 值分布的黑色
-实线,虚线代表相同大小数据集所期望的分布;可以用 ArviZ 的 =az.plot_bpv(., kind="p_value")=
+实线,虚线代表相同大小数据集所期望的分布;可以用 ArviZ 的 ~az.plot_bpv(., kind="p_value")~
 得到这幅图。第二幅子图在概念上类似,区别在于:这次我们是"逐个观测值"地评估有多少模拟结果
 低于(或高于)对应的观测值。对一个校准良好的模型来说,所有观测值应该被同等地预测好,也就是
 说高于/低于观测值的预测数量应该大致相等,因此我们应该得到一个均匀分布。而对任何有限数据集
@@ -264,7 +340,7 @@ $T_{sim}$ 做比较。理想情况下 $p_{B}=0.5$,意味着算出的 $T_{sim}$ �
 检验。
 #+END_QUOTE
 
-
+#+NAME: ch02-code-1b0254669d091359
 #+BEGIN_SRC python
 _, ax = plt.subplots(1, 2, figsize=(10, 4))
 az.plot_bpv(idata_b, kind="p_value", ax=ax[0])
@@ -274,14 +350,14 @@ ax[1].set_yticks([])
 ax[1].set_xticks([0., 0.5, 1.])
 plt.savefig("img/chp02/posterior_predictive_check_pu_values.png")
 #+END_SRC
-[[file:Ch2_ExploratoryAnalysis_zh_files/ch2_012_0.png]]
+[[file:generated/chapter-2-93b35cf98b-ch02-code-1b0254669d091359-f629cadae8-figure.png]]
 
 
 正如前面所说,我们可以选用许多不同的 $T$ 统计量来汇总观测值和预测值。下图给出两个例子:
 第一幅子图中 $T$ 是均值,第二幅子图中 $T$ 是标准差。图中的曲线是后验预测分布给出的 $T$
 统计量的 KDE,点则代表观测数据对应的取值。
 
-
+#+NAME: ch02-code-6ef780da8540df2a
 #+BEGIN_SRC python
 _, ax = plt.subplots(1, 2, figsize=(10, 4))
 az.plot_bpv(idata_b, kind="t_stat", t_stat="mean", ax=ax[0])
@@ -291,7 +367,7 @@ ax[1].set_title("standard deviation")
 ax[1].set_xticks([0.32, 0.41, 0.5])
 plt.savefig("img/chp02/posterior_predictive_check_tstat.png")
 #+END_SRC
-[[file:Ch2_ExploratoryAnalysis_zh_files/ch2_014_0.png]]
+[[file:generated/chapter-2-93b35cf98b-ch02-code-6ef780da8540df2a-024c7d72c2-figure.png]]
 
 
 在继续往下读之前,不妨花点时间仔细端详下图,试着理解为什么这些图会长成这个样子。下图给出
@@ -312,7 +388,7 @@ plt.savefig("img/chp02/posterior_predictive_check_tstat.png")
 4. 模型的预测大体上算是校准良好的,但我生性多疑,所以还是应该再做一次后验预测检验来确认。
 
 如果这种读图方式对你来说还是有点绕,我们可以换一个完全等价、但可能更直观的角度来解读——
-前提是你要记住:你能改变的是*模型*,而不是观测数据 [^8]。同样从上到下:
+前提是你要记住:你能改变的是*模型*,而不是观测数据 [fn:8]。同样从上到下:
 
 1. 左侧有更多观测。
 2. 中间有更多观测。
@@ -322,7 +398,7 @@ plt.savefig("img/chp02/posterior_predictive_check_tstat.png")
 
 希望下图以及配套的讨论,能给你足够的直觉,帮助你在真实场景中做好模型检查。
 
-
+#+NAME: ch02-code-f67edca1a877b268
 #+BEGIN_SRC python
 n_obs = 500
 samples = 2000
@@ -352,7 +428,9 @@ idatas = [idata1,
 _, axes = plt.subplots(len(idatas), 3, figsize=(10, 10), sharex="col")
 
 for idata, ax in zip(idatas, axes):
-    az.plot_ppc(idata, ax=ax[0], color="C1", alpha=0.01, mean=False, legend=False)
+    az.plot_ppc(
+        idata, ax=ax[0], colors=["C1", "k", "C0"],
+        alpha=0.01, mean=False, legend=False)
     az.plot_kde(idata.observed_data["y"].values, ax=ax[0], plot_kwargs={"color":"C4", "zorder":3})
     ax[0].set_xlabel("")
     az.plot_bpv(idata, kind="p_value", ax=ax[1])
@@ -364,7 +442,7 @@ for idata, ax in zip(idatas, axes):
 
 plt.savefig("img/chp02/posterior_predictive_many_examples.png")
 #+END_SRC
-[[file:Ch2_ExploratoryAnalysis_zh_files/ch2_016_0.png]]
+[[file:generated/chapter-2-93b35cf98b-ch02-code-f67edca1a877b268-ce5cd74b61-figure.png]]
 
 
 不管是用图还是用数值汇总,又或者两者结合,后验预测检验都是一个非常灵活的思路。这个概念足够
@@ -393,11 +471,12 @@ $\text{Beta}(2, 5)$ 中抽取的样本,我们用 SciPy 生成,称之为 =good_ch
 高度相关"的片段,把它变成了一个差样本的代表。=bad_chains1= 代表一种很常见的场景:采样器能
 很好地探索参数空间的某个区域,但在一个或多个其他区域却采样困难。
 
-
+#+NAME: ch02-code-070375c7b8fe5e67
 #+BEGIN_SRC python
 np.random.seed(5201)
 #+END_SRC
 
+#+NAME: ch02-code-60d0009f16ec945d
 #+BEGIN_SRC python
 good_chains = stats.beta.rvs(2, 5,size=(2, 2000))
 bad_chains0 = np.random.normal(np.sort(good_chains, axis=None), 0.05,
@@ -424,7 +503,7 @@ chains = {"good_chains":good_chains,
 所包含的信息量。如果两个值之间的相似程度是它们之间时间间隔的函数,我们就说这个序列存在
 自相关。举个例子,如果今天日落是 6 点 03 分,你就知道明天的日落时间也大致在这个附近。事实上,
 越靠近赤道,你就能越准确地根据今天的数据预测未来的日落时间——也就是说,赤道附近的自相关性
-比两极附近更强 [^9]。
+比两极附近更强 [fn:9]。
 
 我们可以把有效样本量(ESS)理解为:一个考虑了自相关性的估计量,它给出的是"如果我们的样本
 真的是 iid 的,那么应该有多少个样本"。这个解释很吸引人,但我们后面会看到,不应该对它做过度
@@ -432,10 +511,22 @@ chains = {"good_chains":good_chains,
 
 用 ArviZ 我们可以用 =az.ess()= 计算均值的有效样本量:
 
-
+#+NAME: ch02-code-997bc919af98ccfc
 #+BEGIN_SRC python
 az.ess(chains)
 #+END_SRC
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+<xarray.Dataset> Size: 24B
+Dimensions:      ()
+Data variables:
+    bad_chains0  float64 8B 2.436
+    bad_chains1  float64 8B 111.1
+    good_chains  float64 8B 4.389e+03
+Attributes:
+    created_at:     2026-08-23T08:21:24.561255+00:00
+    arviz_version:  0.23.4
+#+END_EXAMPLE
 
 
 可以看到,尽管我们每个合成后验的实际样本数都是 4000,=bad_chains0= 的有效性却只相当于一个
@@ -457,13 +548,13 @@ az.ess(chains)
 比从尾部获得好的近似容易得多,原因很简单,尾部主要由罕见事件主导。=az.ess()= 默认返回的是
 =bulk-ESS=,主要评估分布*中心*部分的解析质量。如果你还想报告后验区间,或者你关心的是罕见
 事件,就应该检查 =tail-ESS=,它对应第 5 和第 95 百分位处的最小 ESS。如果你关心特定分位数,
-可以用 =az.ess(., method='quantile')= 向 ArviZ 请求这些具体数值。
+可以用 ~az.ess(., method='quantile')~ 向 ArviZ 请求这些具体数值。
 
 由于 ESS 的取值在参数空间中会发生变化,把这种变化可视化出来往往很有用。我们至少有两种方式
-可以做到这一点:用 =az.plot_ess(., kind="quantiles")= 画出特定分位数处的 ESS,或者用
-=az.plot_ess(., kind="local")= 画出两个分位数之间小区间的 ESS,如下图所示。
+可以做到这一点:用 ~az.plot_ess(., kind="quantiles")~ 画出特定分位数处的 ESS,或者用
+~az.plot_ess(., kind="local")~ 画出两个分位数之间小区间的 ESS,如下图所示。
 
-
+#+NAME: ch02-code-961c3ffd060f32a1
 #+BEGIN_SRC python
 _, axes = plt.subplots(2, 3, figsize=(12, 6), sharey=True, sharex=True)
 az.plot_ess(chains, kind="local", ax=axes[0])
@@ -479,7 +570,7 @@ for ax_ in axes[:,1:].ravel():
 plt.ylim(-100, 5000)
 plt.savefig("img/chp02/plot_ess.png")
 #+END_SRC
-[[file:Ch2_ExploratoryAnalysis_zh_files/ch2_023_0.png]]
+[[file:generated/chapter-2-93b35cf98b-ch02-code-961c3ffd060f32a1-16c5ef179a-figure.png]]
 
 
 图中的虚线代表建议的最低阈值 400。作为一般经验法则,我们建议 ESS 至少要大于 400,否则 ESS
@@ -506,10 +597,22 @@ $\hat R$ 这个倍数继续下降。这也是它"潜在尺度缩减因子"这个
 
 用 ArviZ 的 =az.rhat()= 函数可以计算 $\hat R$ 诊断值:
 
-
+#+NAME: ch02-code-e693124a2d91056b
 #+BEGIN_SRC python
 az.rhat(chains)
 #+END_SRC
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+<xarray.Dataset> Size: 24B
+Dimensions:      ()
+Data variables:
+    bad_chains0  float64 8B 2.408
+    bad_chains1  float64 8B 1.033
+    good_chains  float64 8B 1.0
+Attributes:
+    created_at:     2026-08-23T08:21:27.880161+00:00
+    arviz_version:  0.23.4
+#+END_EXAMPLE
 
 
 从结果可以看到,$\hat R$ 正确地把 =good_chains= 识别为好样本,而把 =bad_chains0= 和
@@ -528,16 +631,28 @@ az.rhat(chains)
 
 用 ArviZ 的 =az.mcse()= 函数可以计算 MCSE:
 
-
+#+NAME: ch02-code-ef2be5c414df2fae
 #+BEGIN_SRC python
 az.mcse(chains)
 #+END_SRC
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+<xarray.Dataset> Size: 24B
+Dimensions:      ()
+Data variables:
+    bad_chains0  float64 8B 0.1077
+    bad_chains1  float64 8B 0.01781
+    good_chains  float64 8B 0.002381
+Attributes:
+    created_at:     2026-08-23T08:21:27.914988+00:00
+    arviz_version:  0.23.4
+#+END_EXAMPLE
 
 
 和 ESS 一样,MCSE 在参数空间中也会变化,因此我们可能也想对不同区域(比如特定分位数)分别
 评估它。此外我们也可能想一次性可视化多个数值,如下图所示。
 
-
+#+NAME: ch02-code-12f4dc6a4179c6fc
 #+BEGIN_SRC python
 _, axes = plt.subplots(1, 3, figsize=(12, 4), sharey=True)
 az.plot_mcse(chains, ax=axes)
@@ -547,18 +662,25 @@ for ax_ in axes[1:]:
 
 plt.savefig("img/chp02/plot_mcse.png")
 #+END_SRC
-[[file:Ch2_ExploratoryAnalysis_zh_files/ch2_029_0.png]]
+[[file:generated/chapter-2-93b35cf98b-ch02-code-12f4dc6a4179c6fc-7cbbf5d4b9-figure.png]]
 
 
 最后,ESS、$\hat R$ 和 MCSE 都可以通过一次调用 =az.summary(.)= 函数得到:
 
-
+#+NAME: ch02-code-bab87765ecbacaa0
 #+BEGIN_SRC python
 az.summary(chains, kind="diagnostics")
 #+END_SRC
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+             mcse_mean  mcse_sd  ess_bulk  ess_tail  r_hat
+bad_chains0      0.108    0.051       2.0      11.0   2.41
+bad_chains1      0.018    0.009     111.0     105.0   1.03
+good_chains      0.002    0.002    4389.0    3966.0   1.00
+#+END_EXAMPLE
 
 
-表格第一列是均值(期望)的蒙特卡洛标准误,第二列是标准差的蒙特卡洛标准误 [^10]。接下来是
+表格第一列是均值(期望)的蒙特卡洛标准误,第二列是标准差的蒙特卡洛标准误 [fn:10]。接下来是
 bulk 和 tail 有效样本量,最后是 $\hat R$ 诊断值。
 
 *** 迹图(Trace Plots)
@@ -568,12 +690,12 @@ bulk 和 tail 有效样本量,最后是 $\hat R$ 诊断值。
 是否收敛到了同一个分布,大致感受一下自相关的程度等等。在 ArviZ 中,调用 =az.plot_trace(.)=
 函数,右边会得到一张迹图,左边则是样本值分布的表示——连续变量用 KDE,离散变量用直方图。
 
-
+#+NAME: ch02-code-becd4c9a8a4677af
 #+BEGIN_SRC python
 az.plot_trace(chains)
 plt.savefig("img/chp02/trace_plots.png")
 #+END_SRC
-[[file:Ch2_ExploratoryAnalysis_zh_files/ch2_033_0.png]]
+[[file:generated/chapter-2-93b35cf98b-ch02-code-becd4c9a8a4677af-8df60192fb-figure.png]]
 
 
 上图展示了 =chains= 的迹图。从中可以看到,=good_chains= 中的抽样属于同一个分布,两条链之间
@@ -593,12 +715,12 @@ plt.savefig("img/chp02/trace_plots.png")
 正如我们在讨论有效样本量时提到的,自相关会降低样本中实际包含的信息量,因此是我们希望尽量
 降低的东西。我们可以用 =az.plot_autocorr= 直接查看自相关情况。
 
-
+#+NAME: ch02-code-59a4d0dc48113519
 #+BEGIN_SRC python
 az.plot_autocorr(chains, combined=True, figsize=(12, 4))
 plt.savefig('img/chp02/autocorrelation_plot.png')
 #+END_SRC
-[[file:Ch2_ExploratoryAnalysis_zh_files/ch2_035_0.png]]
+[[file:generated/chapter-2-93b35cf98b-ch02-code-59a4d0dc48113519-12f7d586f6-figure.png]]
 
 
 上图展示的结果,和我们从 =az.ess= 结果中获得的直觉,至少在定性上是吻合的:=good_chains= 的
@@ -612,7 +734,7 @@ plt.savefig('img/chp02/autocorrelation_plot.png')
 所有链的目标分布相同,我们期望秩次应该服从均匀分布。此外,如果各条链的秩图看起来彼此相似,
 就说明链的混合(mixing)情况良好。
 
-
+#+NAME: ch02-code-4b42393695d2de7a
 #+BEGIN_SRC python
 _, axes = plt.subplots(1, 3, figsize=(12, 4))
 az.plot_rank(chains, kind="bars", ax=axes)
@@ -622,17 +744,17 @@ for ax_ in axes[1:]:
 
 plt.savefig('img/chp02/rank_plot_bars.png')
 #+END_SRC
-[[file:Ch2_ExploratoryAnalysis_zh_files/ch2_037_0.png]]
+[[file:generated/chapter-2-93b35cf98b-ch02-code-4b42393695d2de7a-e1b397cb27-figure.png]]
 
 
 "柱状"表示法之外的一种替代方案,是用竖线来表示,简称"vlines"。
 
-
+#+NAME: ch02-code-274b556c5f4199be
 #+BEGIN_SRC python
 az.plot_rank(chains, kind="vlines", figsize=(12, 4))
 plt.savefig('img/chp02/rank_plot_vlines.png')
 #+END_SRC
-[[file:Ch2_ExploratoryAnalysis_zh_files/ch2_039_0.png]]
+[[file:generated/chapter-2-93b35cf98b-ch02-code-274b556c5f4199be-695ec60034-figure.png]]
 
 
 从上面两幅图可以看到:对 =good_chains=,秩次非常接近均匀分布,两条链看起来彼此相似,没有
@@ -642,7 +764,7 @@ plt.savefig('img/chp02/rank_plot_vlines.png')
 它的问题比 =bad_chains0= 更"局部化"。
 
 秩图往往比迹图更敏感,因此我们推荐优先使用秩图而不是迹图。可以用
-=az.plot_trace(., kind="rank_bars")= 或 =az.plot_trace(., kind="rank_vlines")= 来同时得到
+~az.plot_trace(., kind="rank_bars")~ 或 ~az.plot_trace(., kind="rank_vlines")~ 来同时得到
 秩图和后验的边缘分布。这类图能帮助我们快速感受后验"长什么样",这在很多情况下有助于发现
 采样或模型定义方面的问题——尤其是在建模的早期阶段,当我们对自己到底想要什么还不太确定、
 因此需要探索很多不同方案的时候。随着模型逐渐变得合理,我们就可以检查 ESS、$\hat R$ 和 MCSE
@@ -652,7 +774,7 @@ plt.savefig('img/chp02/rank_plot_vlines.png')
 
 到目前为止,我们都是通过研究生成的样本来诊断采样器的表现。另一种诊断方式,是监控采样方法
 内部工作机制的行为。其中一个突出的例子,就是某些*哈密顿蒙特卡洛(HMC)*方法中"发散"这一
-概念 [^11]。发散(更准确地说是"发散转移",divergent transitions),是诊断样本的一种强大而
+概念 [fn:11]。发散(更准确地说是"发散转移",divergent transitions),是诊断样本的一种强大而
 敏感的方式,可以作为前面几节介绍的诊断方法的补充。
 
 我们用一个非常简单的模型来讨论发散,书中后面会给出更贴近实际的例子。这个模型由参数 $\theta2$
@@ -660,28 +782,114 @@ plt.savefig('img/chp02/rank_plot_vlines.png')
 得到的。当 $\theta1$ 较大时,$\theta2$ 服从的均匀分布跨度也会很宽;当 $\theta1$ 趋近于零时,
 $\theta2$ 的跨度也会趋近于零。用 PyMC 我们可以这样写这个模型(为兼容当前 PyMC 版本,以下把
 原书使用的 =testval= 参数换成了等价的 =initval=,并去掉了已被移除的
-=return_inferencedata=True= 关键字——PyMC 5.x 起 =pm.sample()= 默认就直接返回
+~return_inferencedata=True~ 关键字——PyMC 5.x 起 =pm.sample()= 默认就直接返回
 =InferenceData=):
 
-
+#+NAME: ch02-code-44296a065b3763ec
 #+BEGIN_SRC python
 with pm.Model() as model_0:
     θ1 = pm.Normal("θ1", 0, 1, initval=0.1)
     θ2 = pm.Uniform("θ2", -θ1, θ1)
-    idata_0 = pm.sample()
+    idata_0 = pm.sample(
+        draws=DRAWS, tune=TUNE, chains=CHAINS, cores=1,
+        random_seed=RANDOM_SEED)
 
 with pm.Model() as model_1:
     θ1 = pm.HalfNormal("θ1", 1 / (2/np.pi)**0.5)
     θ2 = pm.Uniform("θ2", -θ1, θ1)
-    idata_1 = pm.sample()
+    idata_1 = pm.sample(
+        draws=DRAWS, tune=TUNE, chains=CHAINS, cores=1,
+        random_seed=RANDOM_SEED)
 
 with pm.Model() as model_1bis:
     θ1 = pm.HalfNormal("θ1", 1 / (2/np.pi)**0.5)
     θ2 = pm.Uniform("θ2", -θ1, θ1)
-    idata_1bis = pm.sample(target_accept=0.95)
+    idata_1bis = pm.sample(
+        draws=DRAWS, tune=DIAGNOSTIC_TUNE, chains=CHAINS, cores=1,
+        target_accept=0.99, random_seed=RANDOM_SEED)
 
 idatas = [idata_0, idata_1, idata_1bis]
 #+END_SRC
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Initializing NUTS using jitter+adapt_diag...
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sequential sampling (4 chains in 1 job)
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+NUTS: [θ1, θ2]
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+Output()
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 119 seconds.
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+There were 2171 divergences after tuning. Increase `target_accept` or reparameterize.
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Initializing NUTS using jitter+adapt_diag...
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sequential sampling (4 chains in 1 job)
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+NUTS: [θ1, θ2]
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+Output()
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 84 seconds.
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+There was 1 divergence after tuning. Increase `target_accept` or reparameterize.
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Initializing NUTS using jitter+adapt_diag...
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sequential sampling (4 chains in 1 job)
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+NUTS: [θ1, θ2]
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+Output()
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sampling 4 chains for 1_500 tune and 1_000 draw iterations (6_000 + 4_000 draws total) took 236 seconds.
+#+END_EXAMPLE
 
 
 #+BEGIN_QUOTE
@@ -694,16 +902,16 @@ idatas = [idata_0, idata_1, idata_1bis]
 #+END_QUOTE
 
 注意,=model_0= 中的模型并没有对任何观测数据做条件化,这意味着 =model_0= 描述的是一个由
-=θ1= 和 =θ2= 两个未知量参数化的(先验)分布。你可能还注意到我们加上了参数 =initval=0.1=
+=θ1= 和 =θ2= 两个未知量参数化的(先验)分布。你可能还注意到我们加上了参数 ~initval=0.1~
 (对应原书中已废弃的 =testval= 参数)。这是为了告诉 PyMC 从某个特定的值($0.1$)开始采样,
 而不是用默认值。默认情况下 $\theta1 = 0$,而在这个值上 $\theta2$ 的概率密度函数是一个狄拉克
-delta 函数 [^12],会产生错误。使用 =initval=0.1= 只影响采样的初始化方式。
+delta 函数 [fn:12],会产生错误。使用 ~initval=0.1~ 只影响采样的初始化方式。
 
 在下图中,可以看到 =model_0= 的 KDE 底部有一些竖直的短线,每一条都代表一次发散,意味着采样
-过程中出了问题。用 =az.plot_pair(., divergences=True)= 也能看到类似的现象,如下下图所示,
+过程中出了问题。用 ~az.plot_pair(., divergences=True)~ 也能看到类似的现象,如下下图所示,
 发散点用蓝色圆点表示——而且这里到处都是!
 
-
+#+NAME: ch02-code-dc8e7ddf07b69054
 #+BEGIN_SRC python
 fig, axes = plt.subplots(6, 2, figsize=(10, 10))
 
@@ -716,8 +924,9 @@ fig.text(0.45, 0.67, s="model 1", fontsize=16)
 fig.text(0.45, 0.33, s="model 1bis", fontsize=16)
 plt.savefig("img/chp02/divergences_trace.png", bbox_inches="tight")
 #+END_SRC
-[[file:Ch2_ExploratoryAnalysis_zh_files/ch2_043_0.png]]
+[[file:generated/chapter-2-93b35cf98b-ch02-code-dc8e7ddf07b69054-2ceac14429-figure.png]]
 
+#+NAME: ch02-code-9d54649b307dc44b
 #+BEGIN_SRC python
 _, axes = plt.subplots(1, 3, figsize=(12, 5), sharex=True, sharey=True)
 
@@ -730,7 +939,7 @@ axes[0].set_ylabel('θ2', rotation=0, labelpad=15)
 axes[1].set_xlabel('θ1', labelpad=10)
 plt.savefig("img/chp02/divergences_pair.png")
 #+END_SRC
-[[file:Ch2_ExploratoryAnalysis_zh_files/ch2_044_0.png]]
+[[file:generated/chapter-2-93b35cf98b-ch02-code-9d54649b307dc44b-cb5de74e2c-figure.png]]
 
 
 =model_0= 显然存在问题。仔细看一下 =model_0= 的定义就会发现,我们把它写得有点古怪:$\theta1$
@@ -746,8 +955,17 @@ $\theta2$。注意我们把 $\theta1$ 的标准差参数设为 $\frac{1}{\sqrt{(
 上面已经用重参数化后的 =model_1=(以及进一步调大 =target_accept= 的 =model_1bis=)重新
 拟合了模型。从上面两幅图可以看到,=model_1= 的发散数量已经大幅减少,但依然能看到零星几个。
 一个可以尝试减少发散的简单办法,是调高 =target_accept= 的值——默认是 0.8,合法的最大值是 1。
-=model_1bis= 和 =model_1= 唯一的区别,就是把这个采样参数改成了
-=pm.sample(., target_accept=0.95)=。可以看到,这样一来我们终于把所有发散都消除了。这已经是
+=model_1bis= 和 =model_1= 的区别,是进一步增加调优步数,并把这个采样参数改成了
+~pm.sample(., target_accept=0.99)~。
+
+#+BEGIN_QUOTE
+*中文版现代化说明*: 原书示例使用 ~target_accept=0.95~;在当前 PyMC 与本书固定随机种子的
+发布执行中,该设置仍偶尔产生少量发散。中文版采用 0.99,并在 smoke/release 档分别使用 300/1500
+次调优迭代,使本例所声称的“消除发散”与实际生成的诊断结果一致。调高该参数不是通用修复方法;
+真实分析仍应优先检查模型几何、重参数化方式、R-hat 与 ESS。
+#+END_QUOTE
+
+可以看到,这样一来我们终于把所有发散都消除了。这已经是
 好消息了,但要真正信任这些样本,我们仍然需要按前面几节的方法检查 $\hat R$ 和 ESS。
 
 #+BEGIN_QUOTE
@@ -763,11 +981,11 @@ $\theta2$。注意我们把 $\theta1$ 的标准差参数设为 $\frac{1}{\sqrt{(
 实践中,默认值并不会对所有数据和模型的组合都奏效。正如前面几节所见,有时候调大 =target_accept=
 参数就能消除发散(比如发散是由数值精度问题引起的时候)。还有一些其他的采样器参数,也可能对
 采样问题有帮助,比如我们可能想增加用于调优 MCMC 采样器的迭代次数。PyMC 中默认是
-=pm.sample(., tune=1000)=。在调优阶段,采样器的参数会被自动调整。有些模型更复杂,需要更多
+~pm.sample(., tune=1000)~。在调优阶段,采样器的参数会被自动调整。有些模型更复杂,需要更多
 轮次的迭代,采样器才能学到更好的参数。因此增加调优步数,有助于提高 ESS 或降低 $\hat R$。增加
 抽样数量也可能有助于收敛,但一般来说其他途径往往更有效果。如果一个模型用几千次抽样都无法
 收敛,那么用 10 倍的抽样量通常依然会失败,或者即便有改善也很难值回额外的计算成本。重参数化、
-改进模型结构、使用信息量更大的先验,乃至干脆更换模型,往往会更有效 [^13]。值得一提的是,在
+改进模型结构、使用信息量更大的先验,乃至干脆更换模型,往往会更有效 [fn:13]。值得一提的是,在
 建模的早期阶段,我们完全可以用相对较少的抽样次数,先测试模型能否跑通、我们是否真的写出了
 想要的模型、结果是否大致合理——这种初步检查一般 200 到 300 次抽样就够了。等我们对模型更有
 信心之后,再把抽样数增加到几千(比如 2000 或 4000)。
@@ -791,25 +1009,25 @@ error)*,也叫*样本外预测精度(out-of-sample predictive accuracy)**——�
 它们帮助我们给模型打分、排序。在众多可能的评分规则中,已有研究表明对数评分规则拥有非常好的
 理论性质,因此被广泛使用。在贝叶斯设定下,对数评分规则可以按如下方式计算:
 
-$$
+\[
 \text{ELPD} = \sum_{i=1}^{n} \int p_t(\tilde y_i) \; \log p(\tilde y_i \mid y_i) \; d\tilde y_i
-$$
+\]
 
 其中 $p_t(\tilde y_i)$ 是 $\tilde y_i$ 真实数据生成过程的分布,$p(\tilde y_i \mid y_i)$
 是后验预测分布。上式定义的量被称为**期望逐点对数预测密度(expected log pointwise
 predictive density, ELPD)**——"期望"是因为我们是在对真实数据生成过程积分,也就是对该过程
 可能生成的所有数据集积分;"逐点"是因为我们是针对 $n$ 个观测值逐一计算($y_i$)。为简单起见,
-不论是连续还是离散模型,我们都统一用"密度"这个词来称呼 [^14]。
+不论是连续还是离散模型,我们都统一用"密度"这个词来称呼 [fn:14]。
 
 在实际问题中,我们并不知道 $p_t(\tilde y_i)$,因此上面这个 ELPD 定义式并不能直接使用。实践
 中我们转而计算:
 
-$$
+\[
 \sum_{i=1}^{n} \log \int \ p(y_i \mid \boldsymbol{\theta}) \; p(\boldsymbol{\theta} \mid y) d\boldsymbol{\theta}
-$$
+\]
 
 这个量(或者乘以某个常数之后)通常被称为*偏差(deviance)*,在贝叶斯和非贝叶斯语境下都
-有使用 [^15]。当似然是高斯分布时,这个量会正比于均方误差。
+有使用 [fn:15]。当似然是高斯分布时,这个量会正比于均方误差。
 
 要计算这个量,我们用的是拟合模型时用过的同一份数据,因此平均而言我们会*高估* ELPD(相对
 于前面严格定义的那个式子),这会导致我们倾向于选出容易过拟合的模型。好在有几种方法可以给出
@@ -826,10 +1044,10 @@ $$
 留一交叉验证(Leave-one-out cross-validation, LOO-CV)是交叉验证的一种特殊形式,每次排除的
 数据只有单个数据点。用 LOO-CV 计算出的 ELPD 记为 $\text{ELPD}_\text{LOO-CV}$:
 
-$$
-\text{ELPD}/\text{LOO-CV} = \sum/{i=1}^{n} \log
+\[
+\text{ELPD}_\text{LOO-CV} = \sum_{i=1}^{n} \log
     \int \ p(y_i \mid \boldsymbol{\theta}) \; p(\boldsymbol{\theta} \mid y_{-i}) d\boldsymbol{\theta}
-$$
+\]
 
 直接计算这个式子的代价很容易变得过高,因为实践中我们并不知道 $\boldsymbol{\theta}$,因此
 需要计算 $n$ 个后验,也就是和数据集中观测值数量一样多的
@@ -841,11 +1059,12 @@ $\boldsymbol{\theta_{-i}}$。好在我们可以用一种叫做 Pareto 平滑重�
 ArviZ 提供了很多与 LOO 相关的函数,用起来很简单,但要理解结果可能需要多留一点心。为了说明
 如何解读这些函数的输出,我们用 3 个简单模型来演示:
 
-
+#+NAME: ch02-code-f972d11031f579dd
 #+BEGIN_SRC python
 np.random.seed(90210)
 #+END_SRC
 
+#+NAME: ch02-code-561fdbe8b5d67c73
 #+BEGIN_SRC python
 y_obs =  np.random.normal(0, 1, size=100)
 idatas_cmp = {}
@@ -854,16 +1073,24 @@ idatas_cmp = {}
 with pm.Model() as mA:
     σ = pm.HalfNormal("σ", 1)
     y = pm.SkewNormal("y", mu=0, sigma=σ, alpha=1, observed=y_obs)
-    idataA = pm.sample(idata_kwargs={"log_likelihood":True})
-    idataA.extend(pm.sample_posterior_predictive(idataA))
+    idataA = pm.sample(
+        draws=DRAWS, tune=TUNE, chains=CHAINS, cores=1,
+        random_seed=RANDOM_SEED,
+        idata_kwargs={"log_likelihood": True})
+    idataA.extend(pm.sample_posterior_predictive(
+        idataA, random_seed=RANDOM_SEED))
     idatas_cmp["mA"] = idataA
 
 # 用固定均值、随机标准差的正态似然生成数据
 with pm.Model() as mB:
     σ = pm.HalfNormal("σ", 1)
     y = pm.Normal("y", 0, σ, observed=y_obs)
-    idataB = pm.sample(idata_kwargs={"log_likelihood":True})
-    idataB.extend(pm.sample_posterior_predictive(idataB))
+    idataB = pm.sample(
+        draws=DRAWS, tune=TUNE, chains=CHAINS, cores=1,
+        random_seed=RANDOM_SEED,
+        idata_kwargs={"log_likelihood": True})
+    idataB.extend(pm.sample_posterior_predictive(
+        idataB, random_seed=RANDOM_SEED))
     idatas_cmp["mB"] = idataB
 
 # 用随机均值、随机标准差的正态似然生成数据
@@ -871,59 +1098,183 @@ with pm.Model() as mC:
     μ = pm.Normal("μ", 0, 1)
     σ = pm.HalfNormal("σ", 1)
     y = pm.Normal("y", μ, σ, observed=y_obs)
-    idataC = pm.sample(idata_kwargs={"log_likelihood":True})
-    idataC.extend(pm.sample_posterior_predictive(idataC))
+    idataC = pm.sample(
+        draws=DRAWS, tune=TUNE, chains=CHAINS, cores=1,
+        random_seed=RANDOM_SEED,
+        idata_kwargs={"log_likelihood": True})
+    idataC.extend(pm.sample_posterior_predictive(
+        idataC, random_seed=RANDOM_SEED))
     idatas_cmp["mC"] = idataC
 #+END_SRC
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Initializing NUTS using jitter+adapt_diag...
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sequential sampling (4 chains in 1 job)
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+NUTS: [σ]
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+Output()
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 337 seconds.
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sampling: [y]
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+Output()
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Initializing NUTS using jitter+adapt_diag...
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sequential sampling (4 chains in 1 job)
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+NUTS: [σ]
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+Output()
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 25 seconds.
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sampling: [y]
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+Output()
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Initializing NUTS using jitter+adapt_diag...
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sequential sampling (4 chains in 1 job)
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+NUTS: [μ, σ]
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+Output()
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 41 seconds.
+#+END_EXAMPLE
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+Sampling: [y]
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+Output()
+#+END_EXAMPLE
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+
+#+END_EXAMPLE
 
 
-要计算 LOO,我们只需要后验样本 [^16]。之后就可以调用 =az.loo(.)=,它可以为单个模型计算 LOO。
+要计算 LOO,我们只需要后验样本 [fn:16]。之后就可以调用 =az.loo(.)=,它可以为单个模型计算 LOO。
 实践中更常见的是同时对两个或更多模型计算 LOO,因此更常用的是 =az.compare(.)= 函数。下表就是
 用 =az.compare(idatas_cmp)= 生成的。
 
-
+#+NAME: ch02-code-b0659db14e138394
 #+BEGIN_SRC python
 cmp = az.compare(idatas_cmp)
 cmp.round(2)
 #+END_SRC
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+    rank  elpd_loo  p_loo  elpd_diff  weight     se   dse  warning scale
+mB     0   -137.87   0.97       0.00     1.0   7.07  0.00    False   log
+mC     1   -138.49   1.91       0.62     0.0   7.02  0.86    False   log
+mA     2   -168.07   1.37      30.20     0.0  10.37  6.57    False   log
+#+END_EXAMPLE
 
 
 表中列很多,我们逐一说明含义:
 
 1. 第一列是索引,列出了传给 =az.compare(.)= 的字典中各模型的名字(键)。
 2. =rank=:模型的排名,从 0(预测精度最高的模型)到模型总数。
-3. =loo=:ELPD 的取值列表。数据框总是按 ELPD 从优到劣排序。
+3. =elpd_loo=:ELPD 的取值列表。数据框总是按 ELPD 从优到劣排序。
 4. =p_loo=:惩罚项的取值列表。可以粗略地把它理解为"估计的有效参数个数"(但不要太当真)。
    对结构更丰富的模型(比如层级模型),这个值可能低于模型实际的参数个数;而当模型预测能力
    很弱、可能存在严重的模型误设时,这个值也可能远高于实际参数个数。
-5. =d_loo=:每个模型的 LOO 值,与排名最高模型的 LOO 值之间的相对差异列表。因此第一名模型
-   这一列必然是 0。
-6. =weight=:分配给每个模型的权重。可以粗略地理解为(在所比较的这组模型中)给定数据下每个
-   模型的概率,详见"模型平均"一节。
+5. =elpd_diff=:每个模型的 ELPD 值,与排名最高模型的 ELPD 值之间的相对差异列表。因此第一名
+   模型这一列必然是 0。
+6. =weight=:分配给每个模型的预测组合权重,详见“模型平均”一节。它的具体含义取决于
+   =az.compare(.)= 采用的方法;默认的堆叠权重以组合后的样本外预测表现为优化目标,不等同于
+   “模型为真”的后验概率。
 7. =se=:ELPD 计算的标准误。
 8. =dse=:两个模型 ELPD 差值的标准误。=dse= 不一定等于 =se=,因为不同模型之间 ELPD 的不确定
    性可能是相关的。排名最高的模型这一列的 =dse= 恒为 0。
 9. =warning=:如果为 =True=,说明 LOO 近似可能不可靠。
-10. =loo_scale=:所报告数值的尺度。默认是对数尺度(log)。其他选项包括 deviance(即对数得分
+10. =scale=:所报告数值的尺度。默认是对数尺度(log)。其他选项包括 deviance(即对数得分
     乘以 -2,这会反转排序方向:ELPD 越低越好)和 negative-log(对数得分乘以 -1,和 deviance
     一样,数值越低越好)。
 
+    中文版现代化说明:较早版本的 ArviZ 把第 5、10 两列分别叫作 =d_loo= 与 =loo_scale=;
+    当前 ArviZ（本书使用的版本）已将它们重命名为 =elpd_diff= 与 =scale=，第 3 列也相应地
+    叫作 =elpd_loo= 而非 =loo=。下文提到这些列名之处已同步更新。
+
 我们也可以把表格里的部分信息用图形表示出来,如下图所示。模型同样按预测精度从高到低排列。
-空心点代表 =loo= 的值,黑色实心点是未经 =p_loo= 惩罚项调整的预测精度。黑色线段代表 LOO 计算
+空心点代表 =elpd_loo= 的值,黑色实心点是未经 =p_loo= 惩罚项调整的预测精度。黑色线段代表 LOO 计算
 的标准误 =se=。灰色线段以三角形为中心,代表每个模型与最优模型之间 LOO 差值的标准误 =dse=。
 我们可以看到 =mB= $\approx$ =mC= $>$ =mA=。
 
-
+#+NAME: ch02-code-0b2213623b14889b
 #+BEGIN_SRC python
 az.plot_compare(cmp, figsize=(9, 3))
 plt.savefig("img/chp02/compare_dummy.png")
 #+END_SRC
-[[file:Ch2_ExploratoryAnalysis_zh_files/ch2_051_0.png]]
+[[file:generated/chapter-2-93b35cf98b-ch02-code-0b2213623b14889b-70332deccb-figure.png]]
 
 
 从上表和上图可以看到,模型 =mA= 排名最低,和另外两个模型明显拉开了差距。下面我们重点讨论
 另外两个模型,因为它们之间的差异更微妙。=mB= 预测精度最高,但和 =mC= 相比差距可以忽略不计。
-经验法则是:LOO 差值(=d_loo=)小于 4 就算是小差异。这两个模型的区别在于:=mB= 的均值固定
+经验法则是:LOO 差值(=elpd_diff=)小于 4 就算是小差异。这两个模型的区别在于:=mB= 的均值固定
 为 0,而 =mC= 的均值有自己的先验分布。LOO 会惩罚这种额外增加的先验灵活性——体现在 =mC= 的
 =p_loo= 比 =mB= 更大,并且"黑点(未惩罚 ELPD)"与"空心点($\text{ELPD}_\text{LOO-CV}$)"
 之间的距离,=mC= 也比 =mB= 更大。我们还能看到这两个模型的 =dse= 远小于它们各自的 =se=,说明
@@ -945,12 +1296,12 @@ plt.savefig("img/chp02/compare_dummy.png")
 恰好相反。可以看到前两幅图 =mA - mB= 和 =mA - mC= 非常相似,原因是模型 =mB= 和模型 =mC=
 本身就彼此非常相似。下下图显示,观测点 34、49、72、75、82 正是最"极端"的 5 个观测值。
 
-
+#+NAME: ch02-code-3b1458abe2554be8
 #+BEGIN_SRC python
 az.plot_elpd(idatas_cmp, figsize=(10, 5), plot_kwargs={"marker":"."}, threshold=2);
 plt.savefig("img/chp02/elpd_dummy.png")
 #+END_SRC
-[[file:Ch2_ExploratoryAnalysis_zh_files/ch2_053_0.png]]
+[[file:generated/chapter-2-93b35cf98b-ch02-code-3b1458abe2554be8-0ade60d9f8-figure.png]]
 
 
 *** Pareto 形状参数
@@ -961,7 +1312,7 @@ $\hat \kappa$ 可以用来检测*高影响力观测值*——也就是说,当这
 分布产生很大影响。一般来说,$\hat \kappa$ 值越高,越可能说明数据或模型存在问题,尤其是当
 $\hat \kappa > 0.7$ 时。这种情况下的建议做法包括:
 
-- 使用矩匹配(moment matching)方法 [^17]。通过一些额外计算,可以把 MCMC 后验抽样转换成
+- 使用矩匹配(moment matching)方法 [fn:17]。通过一些额外计算,可以把 MCMC 后验抽样转换成
   更可靠的重要性采样估计。
 - 对有问题的观测值执行精确的留一交叉验证,或者改用 k 折交叉验证。
 - 换一个对异常观测更稳健的模型。
@@ -972,7 +1323,7 @@ $\hat \kappa > 0.7$ 时。这种情况下的建议做法包括:
 0.09 只是我们随便选的一个数字,你也可以换其他截断值试试看。对比下图与上一张逐点 ELPD 图可以
 发现,$\hat \kappa$ 最高的观测点,不一定是 ELPD 最高(或最低)的观测点。
 
-
+#+NAME: ch02-code-60279f4754c0686a
 #+BEGIN_SRC python
 _, axes = plt.subplots(1, 3, figsize=(12, 4), sharey=True)
 for idx, (model, ax) in enumerate(zip(("mA", "mB", "mC"), axes)):
@@ -986,8 +1337,9 @@ for idx, (model, ax) in enumerate(zip(("mA", "mB", "mC"), axes)):
 
 plt.savefig("img/chp02/loo_k_dummy.png")
 #+END_SRC
-[[file:Ch2_ExploratoryAnalysis_zh_files/ch2_055_0.png]]
+[[file:generated/chapter-2-93b35cf98b-ch02-code-60279f4754c0686a-c864295fa5-figure.png]]
 
+#+NAME: ch02-code-aa7ec06d6e9af8a9
 #+BEGIN_SRC python
 az.plot_kde(y_obs, rug=True)
 plt.yticks([])
@@ -997,7 +1349,11 @@ for da, loc in zip([34, 49, 72, 75, 95], [-0.065, -0.05, -0.065, -0.065, -0.065]
 plt.text(y_obs[78], loc, "78", fontweight='bold');
 plt.savefig("img/chp02/elpd_and_khat.png")
 #+END_SRC
-[[file:Ch2_ExploratoryAnalysis_zh_files/ch2_056_0.png]]
+#+RESULTS: stderr
+#+BEGIN_EXAMPLE
+findfont: Failed to find font weight bold, now using 400.
+#+END_EXAMPLE
+[[file:generated/chapter-2-93b35cf98b-ch02-code-aa7ec06d6e9af8a9-d2c7f43f39-figure.png]]
 
 
 *** 当 Pareto $\hat \kappa$ 较大时如何解读 p_loo
@@ -1006,11 +1362,11 @@ plt.savefig("img/chp02/elpd_and_khat.png")
 我们还能从中读出一些额外信息。如果 $\hat \kappa > 0.7$,那么把 p_loo 和实际参数个数 $p$
 做对比,可以提供一些额外线索:
 
-- 如果 $p\_loo \ll p$,模型很可能被误设了。通常在后验预测检验中也会看到问题——后验预测
+- 如果 $p_loo \ll p$,模型很可能被误设了。通常在后验预测检验中也会看到问题——后验预测
   样本与观测值匹配得很差。
-- 如果 $p\_loo < p$,且 $p$ 相对观测数量而言比较大(比如 $p > \frac{N}{5}$,$N$ 是观测总
+- 如果 $p_loo < p$,且 $p$ 相对观测数量而言比较大(比如 $p > \frac{N}{5}$,$N$ 是观测总
   数),这通常说明模型过于灵活,或者先验信息量不足,导致很难预测被留出的那个观测值。
-- 如果 $p\_loo > p$,模型同样可能存在严重的误设。如果参数个数 $p \ll N$,后验预测检验也
+- 如果 $p_loo > p$,模型同样可能存在严重的误设。如果参数个数 $p \ll N$,后验预测检验也
   很可能已经暴露出问题;但如果 $p$ 相对观测数而言较大(比如 $p > \frac{N}{5}$),后验预测
   检验就有可能看不出问题。
 
@@ -1027,28 +1383,27 @@ plt.savefig("img/chp02/elpd_and_khat.png")
 对后验预测检验的一个批评是:我们把数据用了两次——一次用来拟合模型,一次用来批判模型。
 LOO-PIT 图正是为了回应这个担忧而设计的。它的核心思路是:用 LOO 作为交叉验证的一种快速、
 可靠的近似,从而避免重复使用数据。"PIT"这部分,指的是概率积分变换(Probability Integral
-Transform)[^19]——这是一种一维变换,如果用任意连续随机变量自身的 CDF 对其做变换,就能得到
+Transform)[fn:19]——这是一种一维变换,如果用任意连续随机变量自身的 CDF 对其做变换,就能得到
 一个 $\mathcal{U}(0, 1)$ 分布。在 LOO-PIT 中我们并不知道真实的 CDF,而是用经验 CDF 来近似
 它。抛开这些数学细节不谈,划重点的结论是:对一个校准良好的模型,我们应该期望得到一个近似
 均匀的分布。如果你有种似曾相识的感觉,不用担心,你没有特异功能,这也不是"母体故障"——这
-听起来耳熟,是因为这其实正是我们在"理解你的预测"一节中,借助 `az.plot_bpv(idata,
-kind="u_value")` 讨论过的同一个想法。
+听起来耳熟,是因为这其实正是我们在"理解你的预测"一节中,借助 ~az.plot_bpv(idata, kind="u_value")~ 讨论过的同一个想法。
 
 LOO-PIT 是通过比较观测数据 $y$ 和后验预测数据 $\tilde y$ 得到的,逐点比较:
 
-$$
+\[
 p_i = P(\tilde y_i \leq y_i \mid y_{-i})
-$$
+\]
 
 直观地说,LOO-PIT 计算的是:在去掉第 $i$ 个观测之后,后验预测数据 $\tilde y_i$ 小于观测值
-$y_i$ 的概率。因此 =az.plot_bpv(idata, kind="u_value")= 和 LOO-PIT 的区别在于:后者近似
+$y_i$ 的概率。因此 ~az.plot_bpv(idata, kind="u_value")~ 和 LOO-PIT 的区别在于:后者近似
 地避免了数据被使用两次,但两幅图的整体解读方式是一样的。
 
 下图展示了模型 =mA=、=mB= 和 =mC= 的 LOO-PIT。可以看到,从模型 =mA= 的视角看,在取值较低的
 区域观测数据比预期更多,而在取值较高的区域观测数据比预期更少——也就是说这个模型是有偏的。
 相比之下,模型 =mB= 和 =mC= 看起来校准得相当好。
 
-
+#+NAME: ch02-code-8399e29163c4df10
 #+BEGIN_SRC python
 _, axes = plt.subplots(1, 3, figsize=(12, 4), sharey=True)
 for model, ax in zip(("mA", "mB", "mC"), axes):
@@ -1059,7 +1414,7 @@ for model, ax in zip(("mA", "mB", "mC"), axes):
 
 plt.savefig("img/chp02/loo_pit_dummy.png")
 #+END_SRC
-[[file:Ch2_ExploratoryAnalysis_zh_files/ch2_058_0.png]]
+[[file:generated/chapter-2-93b35cf98b-ch02-code-8399e29163c4df10-4d1ac13ea4-figure.png]]
 
 
 *** 模型平均
@@ -1073,16 +1428,16 @@ plt.savefig("img/chp02/loo_pit_dummy.png")
 Averaging)。这个想法在理论上很吸引人,但实践中存在问题(详见"边际似然"相关章节)。另一种
 方案,是用 LOO 的取值来估计每个模型的权重,公式如下:
 
-$$
+\[
 w_i = \frac {e^{-\Delta_i }} {\sum_j^k e^{-\Delta_j }}
-$$
+\]
 
 其中 $\Delta_i$ 是第 $i$ 个模型的 LOO 值与最高 LOO 值之间的差(假设使用的是对数尺度,这也是
 ArviZ 的默认设置)。
 
 这种方法被称为*伪贝叶斯模型平均(pseudo Bayesian model averaging)*,或者类 Akaike
-权重法 [^20],是一种从 LOO 出发、启发式地计算每个模型(在给定这一组模型的前提下)相对概率
-的方法 [^21]。分母只是一个归一化项,确保权重加起来等于 1。上式给出的方案简单好用,但一个
+权重法 [fn:20],是一种从 LOO 出发、启发式地计算每个模型(在给定这一组模型的前提下)相对概率
+的方法 [fn:21]。分母只是一个归一化项,确保权重加起来等于 1。上式给出的方案简单好用,但一个
 主要的缺陷是:它没有考虑 LOO 计算本身的不确定性。我们可以在高斯近似下计算标准误,并相应地
 修改上式,或者采用更稳健的做法,比如贝叶斯自助法(Bayesian Bootstrapping)。
 
@@ -1090,9 +1445,9 @@ ArviZ 的默认设置)。
 元模型(meta-model),使元模型与"真实"生成模型之间的散度最小。在对数评分规则下,这等价于
 计算:
 
-$$
+\[
 \max_{w} \frac{1}{n} \sum_{i=1}^{n}log\sum_{j=1}^{k} w_j p(y_i \mid y_{-i}, M_j)
-$$
+\]
 
 其中 $n$ 是数据点个数,$k$ 是模型个数。为了让解存在,我们约束 $w_j \ge 0$ 且
 $\sum_{j=1}^{k} w_j = 1$。$p(y_i \mid y_{-i}, M_j)$ 是模型 $M_j$ 的留一预测分布。前面已经
@@ -1106,10 +1461,46 @@ $\sum_{j=1}^{k} w_j = 1$。$p(y_i \mid y_{-i}, M_j)$ 是模型 $M_j$ 的留一�
 =mB= 已经被纳入我们比较的模型集合,=mC= 就不再提供新的信息——换句话说,再把它包含进来纯属
 多余。
 
-函数 =pm.sample_posterior_predictive_w(.)=(或在新版本 PyMC 里对应的加权后验预测采样方式)
-接受一组迹和一组权重,让我们能方便地生成加权后验预测样本。权重可以来自任何地方,但使用
-=az.compare(., method="stacking")= 算出的权重是很合理的选择。
+#+BEGIN_QUOTE
+*中文版现代化说明*: 原书使用的 =pm.sample_posterior_predictive_w(.)= 已不在当前 PyMC 的
+公共 API 中。现代做法是先让每个模型分别生成后验预测样本,再显式构造一个有限混合:按照
+~az.compare(., method="stacking")~ 给出的权重选择模型,随后从该模型的后验预测样本中抽取一行。
+这样既不依赖已移除的函数,也把“如何混合”这一统计操作写得更清楚。堆叠权重是为优化组合模型的
+样本外预测表现而求得的系数,一般不应解释为模型为真的后验概率。
+#+END_QUOTE
 
+#+NAME: ch02-code-afc867a976777c48
+#+BEGIN_SRC python
+stacking_cmp = az.compare(idatas_cmp, method="stacking")
+model_names = stacking_cmp.index.to_numpy()
+stacking_weights = stacking_cmp["weight"].to_numpy(dtype=float, copy=True)
+stacking_weights /= stacking_weights.sum()
+
+rng = np.random.default_rng(RANDOM_SEED)
+selected_models = rng.choice(
+    model_names, size=PREDICTIVE_SAMPLES, p=stacking_weights)
+ensemble_blocks = []
+for model_name in model_names:
+    block_size = int(np.count_nonzero(selected_models == model_name))
+    if block_size == 0:
+        continue
+    predictions = az.extract(
+        idatas_cmp[model_name], group="posterior_predictive",
+        combined=True)["y"]
+    prediction_array = np.moveaxis(
+        predictions.values, predictions.get_axis_num("sample"), 0)
+    draw_indices = rng.choice(
+        prediction_array.shape[0], size=block_size, replace=True)
+    ensemble_blocks.append(prediction_array[draw_indices])
+
+stacked_posterior_predictive = np.concatenate(ensemble_blocks, axis=0)
+rng.shuffle(stacked_posterior_predictive, axis=0)
+stacked_posterior_predictive.shape
+#+END_SRC
+#+RESULTS: output
+#+BEGIN_EXAMPLE
+(1000, 100)
+#+END_EXAMPLE
 
 
 ** 习题
@@ -1150,7 +1541,7 @@ $\hat R$ 值。重点关注 mu 和 tau 两个参数。这三种不同诊断分�
 4. 用 $\hat \kappa$ 值诊断 LOO,对这个具体案例,是否有理由担心 LOO 的精度?
 
 *2E7.* 复现前面的后验预测检验多例子图,但把 =az.plot_bpv(.)= 换成
-=az.plot_loo_pit(ecdf=True)=。解读结果。提示:使用 =ecdf=True= 选项时,得到的不是 LOO-PIT
+~az.plot_loo_pit(ecdf=True)~。解读结果。提示:使用 ~ecdf=True~ 选项时,得到的不是 LOO-PIT
 的 KDE,而是 LOO-PIT 经验累积分布函数(ECDF)与均匀分布 CDF 之差的图。理想情况下这个差值
 应该处处为零。
 
@@ -1170,12 +1561,12 @@ $\hat R$ 值。重点关注 mu 和 tau 两个参数。这三种不同诊断分�
 考虑单支球队。假设比分服从泊松分布,参数为得分率 $\mu$。我们选用先验 $\text{Gamma}(0.5,
 0.00001)$,因为它有时被推荐为一种"客观"先验。
 
-```python
+#+BEGIN_SRC python
 with pm.Model() as model:
     μ = pm.Gamma("μ", 0.5, 0.00001)
     score = pm.Poisson("score", μ)
     trace = pm.sample_prior_predictive()
-```
+#+END_SRC
 
 1. 生成并画出先验预测分布,在你看来它合理吗?
 2. 运用你的体育常识来改进先验选择。
@@ -1188,8 +1579,8 @@ with pm.Model() as model:
 1. 用 ArviZ 比较采样结果,借助自相关图、迹图和 ESS,解释观察到的差异。
 2. 修改代码,让你能得到不止一条独立的链。用 ArviZ 计算秩图和 $\hat R$。
 
-*2M13.* 用 =np.random.binomial(n=1, p=0.5, size=200)= 生成一个随机样本,用 Beta-Binomial
-模型拟合它。分别用 =pm.sample(., step=pm.Metropolis())=(Metropolis-Hastings 采样器)和
+*2M13.* 用 ~np.random.binomial(n=1, p=0.5, size=200)~ 生成一个随机样本,用 Beta-Binomial
+模型拟合它。分别用 ~pm.sample(., step=pm.Metropolis())~(Metropolis-Hastings 采样器)和
 =pm.sample(.)=(标准采样器)采样,从 ESS、$\hat R$、自相关、迹图和秩图等方面比较结果。查看
 PyMC 的日志信息,系统自动选用的是哪种采样器?你对这个采样器相对 Metropolis-Hastings 的表现
 有什么结论?
@@ -1200,7 +1591,7 @@ PyMC 的日志信息,系统自动选用的是哪种采样器?你对这个采样�
    和书中的结果对比,解释异同。
 3. 这些诊断结果,是否让你重新思考了"为什么 =bad_chains3= 是差链"这个问题?
 
-*2H15.* 用 =np.random.binomial(n=1, p=0.5, size=200)= 生成一个随机样本,用 Beta-Binomial
+*2H15.* 用 ~np.random.binomial(n=1, p=0.5, size=200)~ 生成一个随机样本,用 Beta-Binomial
 模型拟合它。
 1. 检查 LOO-PIT 是否近似均匀。
 2. 调整先验,使模型拟合变差,让 LOO-PIT 在取值接近零处偏低、接近一处偏高。为你的先验选择
@@ -1227,50 +1618,49 @@ PyMC 的日志信息,系统自动选用的是哪种采样器?你对这个采样�
 
 ** 脚注
 
-[^1]: 参见 <https://www.countbayesie.com/blog/2015/2/18/bayes-theorem-with-lego>。
+[fn:1] 参见 [[https://www.countbayesie.com/blog/2015/2/18/bayes-theorem-with-lego]]。
 
-[^2]: 这里我们省略了与数据采集本身相关的任务,但实验设计的重要性丝毫不亚于统计分析的其他
-    方面,详见第 9 章。
+[fn:2] 这里我们省略了与数据采集本身相关的任务,但实验设计的重要性丝毫不亚于统计分析的其他
+  方面,详见第 9 章。
 
-[^3]: <https://arviz-devs.github.io/arviz/>
+[fn:3] [[https://arviz-devs.github.io/arviz/]]
 
-[^4]: 该例子改编自 <https://mc-stan.org/users/documentation/case-studies/golf.html> 以及
-    <https://docs.pymc.io/notebooks/putting_workflow.html>。
+[fn:4] 该例子改编自 [[https://mc-stan.org/users/documentation/case-studies/golf.html]] 以及
+  [[https://docs.pymc.io/notebooks/putting_workflow.html]]。
 
-[^5]: 该例子改编自参考文献 Gelman2020。
+[fn:5] 该例子改编自参考文献 Gelman2020。
 
-[^6]: 逻辑回归模型的细节见第 3 章。
+[fn:6] 逻辑回归模型的细节见第 3 章。
 
-[^7]: 后验预测检验是一个非常通用的思路,这些图并不是唯一的选择,只是 ArviZ 提供的部分选项。
+[fn:7] 后验预测检验是一个非常通用的思路,这些图并不是唯一的选择,只是 ArviZ 提供的部分选项。
 
-[^8]: 除非你意识到需要重新收集数据,但那是另一个故事了。
+[fn:8] 除非你意识到需要重新收集数据,但那是另一个故事了。
 
-[^9]: 可以试试 <https://www.timeanddate.com/sun/ecuador/quito>。
+[fn:9] 可以试试 [[https://www.timeanddate.com/sun/ecuador/quito]]。
 
-[^10]: 不要和均值 MCSE 的标准差混淆。
+[fn:10] 不要和均值 MCSE 的标准差混淆。
 
-[^11]: 目前最常用、最有效的贝叶斯推断采样方法大多是 HMC 的变体,包括 PyMC 对连续变量默认
-    使用的方法。
+[fn:11] 目前最常用、最有效的贝叶斯推断采样方法大多是 HMC 的变体,包括 PyMC 对连续变量默认
+  使用的方法。
 
-[^12]: 一个除零点外处处为零、在零点取值无穷大的函数。
+[fn:12] 一个除零点外处处为零、在零点取值无穷大的函数。
 
-[^13]: 对像序贯蒙特卡洛(SMC)这样的采样器而言,增加抽样数量同时也会增加粒子数,因此确实
-    可能带来更好的收敛效果。
+[fn:13] 对像序贯蒙特卡洛(SMC)这样的采样器而言,增加抽样数量同时也会增加粒子数,因此确实
+  可能带来更好的收敛效果。
 
-[^14]: 严格来说离散模型应该使用"概率"而不是"密度",但这个区分在实践中很快会变得繁琐。
+[fn:14] 严格来说离散模型应该使用"概率"而不是"密度",但这个区分在实践中很快会变得繁琐。
 
-[^15]: 在非贝叶斯语境下,$\boldsymbol{\theta}$ 是一个点估计,例如通过最大化似然得到。
+[fn:15] 在非贝叶斯语境下,$\boldsymbol{\theta}$ 是一个点估计,例如通过最大化似然得到。
 
-[^16]: 我们同时也会计算后验预测分布的样本,用来计算 LOO-PIT。
+[fn:16] 我们同时也会计算后验预测分布的样本,用来计算 LOO-PIT。
 
-[^17]: 在本书写作时,这个方法尚未在 ArviZ 中实现,但你阅读本书时它可能已经可用。
+[fn:17] 在本书写作时,这个方法尚未在 ArviZ 中实现,但你阅读本书时它可能已经可用。
 
-[^18]: 可参考案例研究 <https://avehtari.github.io/modelselection/roaches.html>。
+[fn:18] 可参考案例研究 [[https://avehtari.github.io/modelselection/roaches.html]]。
 
-[^19]: 关于概率积分变换更深入的介绍,请参阅相关章节。
+[fn:19] 关于概率积分变换更深入的介绍,请参阅相关章节。
 
-[^20]: 赤池信息量准则(AIC)是泛化误差的一种估计量,在频率学派统计中很常用,但其假设通常
-    不适合直接套用在贝叶斯模型上。
+[fn:20] 赤池信息量准则(AIC)是泛化误差的一种估计量,在频率学派统计中很常用,但其假设通常
+  不适合直接套用在贝叶斯模型上。
 
-[^21]: 这个公式对 WAIC 等其他信息准则同样适用。
-
+[fn:21] 这个公式对 WAIC 等其他信息准则同样适用。

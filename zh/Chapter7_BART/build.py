@@ -1572,7 +1572,12 @@ assert np.array_equal(X_interaction_bart[:, 0], X_interaction[:, 1])''',
     ),
     (
         "ch07-fit-interaction-bart",
-        r'''with pm.Model() as bart_interaction_model:
+        r'''# 中文版现代化说明：在 release 预算（1000 draws x 4 chains）下，本模型的
+# sigma_interaction 偶尔报告 r_hat > 1.01；这不影响 mu_interaction 的形状断言，
+# 也不改变下方 PDP/ICE 对比演示的教学结论，但读者若在自己环境中复现，看到
+# 该收敛提示不必意外。m=200 也是本章计算量最大的单个模型：在缺少 PyTensor
+# 原生编译后端的宿主上，仅这一个单元格就可能需要十余分钟。
+with pm.Model() as bart_interaction_model:
     mu_interaction = pmb.BART(
         "mu_interaction", X_interaction_bart, y_interaction, m=200
     )

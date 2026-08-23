@@ -1,0 +1,4 @@
+             mcse_mean  mcse_sd  ess_bulk  ess_tail  r_hat
+bad_chains0      0.108    0.051       2.0      11.0   2.41
+bad_chains1      0.018    0.009     111.0     105.0   1.03
+good_chains      0.002    0.002    4389.0    3966.0   1.00

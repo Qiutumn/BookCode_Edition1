@@ -1,0 +1,7 @@
+           rank   elpd_loo      p_loo  elpd_diff  weight         se  \
+model_ma1     0 -18.102053  14.663191   0.000000     1.0   3.850218   
+model_ma2     1 -41.297979  39.948309  23.195927     0.0  10.345277   
+
+                 dse  warning scale  
+model_ma1   0.000000     True   log  
+model_ma2  14.195494     True   log  

@@ -1,6 +1,9 @@
-# Unresolved PyMC-BART extension group for Chapter 7.
-# These compatibility pins are separate from pymc.lock.txt so the base PyMC
-# environment remains independently installable.
+# PyMC-BART extension group for Chapter 7. Verified locally on 2026-08-21 to
+# install cleanly with --no-deps alongside the exact pymc.lock.txt stack
+# without upgrading pymc/pytensor/numpy/arviz; see bart.lock.txt for the
+# resolved, tested pins. These compatibility pins are kept separate from
+# pymc.lock.txt so the base PyMC environment remains independently
+# installable without pulling in PyMC-BART.
 pymc-bart==0.11.0
 arviz-stats[xarray]>=0.6.0,<0.7.0
 arviz-base>=0.6.0,<0.7.0

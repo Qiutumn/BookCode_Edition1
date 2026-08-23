@@ -1,0 +1,2 @@
+array([<Axes: title={'center': 'β_0'}>, <Axes: title={'center': 'β_1'}>],
+      dtype=object)

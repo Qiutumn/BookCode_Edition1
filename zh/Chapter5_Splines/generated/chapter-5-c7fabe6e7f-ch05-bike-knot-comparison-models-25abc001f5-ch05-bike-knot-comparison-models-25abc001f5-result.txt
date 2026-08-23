@@ -1,0 +1,6 @@
+       rank  elpd_loo  p_loo  elpd_diff  weight     se   dse  warning scale
+m_12k     0   -357.51   9.61       0.00    0.78  18.72  0.00     True   log
+m_9k      1   -362.25  11.40       4.75    0.00  18.42  2.35     True   log
+m_18k     2   -362.44  17.09       4.94    0.06  18.22  2.89     True   log
+m_6k      3   -366.20   8.85       8.70    0.00  19.04  4.91     True   log
+m_3k      4   -378.68   5.35      21.17    0.16  18.67  8.43     True   log

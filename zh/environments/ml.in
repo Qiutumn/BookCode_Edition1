@@ -1,5 +1,9 @@
 # Machine-learning extension used by Chapter 8's random-forest selector and
 # its behavioral tests. scikit-learn 1.9.0 is the version this chapter was
 # actually executed against (37/37 code cells, zero errors); the previous
-# <1.9.0 upper bound excluded the exact version that was verified.
+# <1.9.0 upper bound excluded the exact version that was verified. Verified
+# again on 2026-08-21 installing with --no-deps alongside the exact
+# pymc.lock.txt stack; see ml.lock.txt for the resolved, tested pins
+# (scikit-learn plus its joblib/narwhals dependencies -- threadpoolctl is
+# already satisfied by pymc.lock.txt).
 scikit-learn==1.9.0

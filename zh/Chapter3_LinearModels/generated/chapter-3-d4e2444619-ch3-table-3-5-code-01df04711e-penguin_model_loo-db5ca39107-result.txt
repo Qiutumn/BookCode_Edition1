@@ -1,0 +1,4 @@
+           rank  elpd_loo  p_loo  elpd_diff  weight   se  dse  warning scale
+mass_bill     0     -12.8    1.2        0.0     1.0  2.9  0.0    False   log
+bill          1     -26.9    1.4       14.1     0.0  5.8  3.9    False   log
+mass          2    -135.6    1.9      122.8     0.0  5.3  5.7    False   log

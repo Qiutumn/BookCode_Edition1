@@ -1,0 +1,53 @@
+#+TITLE: 献词
+#+LANGUAGE: zh-CN
+#+OPTIONS: toc:3 num:2
+#+STARTUP: showall
+
+*** 中文版补充: 中文版说明与授权
+
+原著作者: Osvaldo A. Martin, Ravin Kumar, Junpeng Lao
+
+原书: /Bayesian Modeling and Computation in Python/ (Chapman & Hall/CRC, 2021), ISBN 978-0-367-89436-8
+
+原始仓库: [[https://github.com/BayesianModelingandComputationInPython/BookCode_Edition1][BayesianModelingandComputationInPython/BookCode_Edition1]]
+
+本单元译自 =markdown/dedication.md=。本中文版在保留原意、结构、引用、公式与代码的基础上完成简体中文翻译,并在确有需要时将代码更新为当前公开的 PyMC、PyTensor、ArviZ 等 API。新增内容统一标为“中文版补充”,行为或 API 变化统一标为“中文版现代化说明”。
+
+授权范围严格遵循原仓库 =welcome.md=:
+
+- 本书内容中除代码以外的部分采用 [[http://creativecommons.org/licenses/by-nc-sa/4.0/][Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License]] (CC BY-NC-SA 4.0) 授权。
+- 代码(包括代码块与 Jupyter notebooks)采用 [[https://github.com/BayesianModelingandComputationInPython/BookCode_Edition1/blob/main/LICENSE][GNU GENERAL PUBLIC LICENSE Version 2]] (GPL-2.0) 授权。
+
+因此,本中文版不声称全部内容均采用 GPL 授权。翻译与现代化改动不改变原内容各自适用的授权范围。
+
+<<dedication>>
+
+* 题献
+
+#+BEGIN_QUOTE
+献给 Romina 和 Abril,也献给她们充满关怀的爱。献给每一位帮助我
+走到这里的人。
+
+
+--- /Osvaldo Martin/
+#+END_QUOTE
+
+#+BEGIN_QUOTE
+献给那些教育者,无论他们来自正规教育还是非正规教育;他们无条件地分享
+知识与智慧,塑造了今天的我。按照他们在我生命中出现的先后顺序,他们是
+Tim Pegg,Mr. Michael Collins,Mrs. Sara LaFramboise Saadeh,
+Professor Mehrdad Haghi,Professor Winny Dong,Professor Dixon Davis,
+Jason Errington,Chris Lopez,John Norman,Professor Ananth Krishnamurthy,
+以及 Kurt Campbell。
+
+谢谢你们
+
+
+--- /Ravin Kumar/
+#+END_QUOTE
+
+#+BEGIN_QUOTE
+献给 Yuli。
+
+--- /Junpeng Lao/
+#+END_QUOTE

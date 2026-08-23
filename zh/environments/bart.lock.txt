@@ -1,0 +1,8 @@
+# Verified top-level lock input, Python 3.12.3, 2026-08-21.
+# Install after core.lock.txt and pymc.lock.txt, then run `python -m pip check`.
+# pymc-bart's own dependency metadata is satisfied by the pymc.lock.txt stack;
+# install with --no-deps if your resolver tries to change numpy/pymc/pytensor,
+# since pymc-bart's transitive resolution is not what was verified here.
+pymc-bart==0.11.0
+arviz-stats==0.6.0
+arviz-base==0.6.0

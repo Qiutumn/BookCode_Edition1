@@ -17,12 +17,12 @@ on:
   workflow_dispatch:
     inputs:
       run_smoke:
-        description: "Execute the smoke-verified chapter matrix (1-3, 9)"
+        description: "Execute the smoke-verified chapter matrix"
         required: false
         type: boolean
         default: false
       run_release:
-        description: "Execute the smoke-verified chapter release matrix (1-3, 9) without promotion"
+        description: "Execute the smoke-verified chapter release matrix without promotion"
         required: false
         type: boolean
         default: false
@@ -54,6 +54,14 @@ jobs:
       - name: Validate book and unit schemas
         run: python zh/tools/build_book.py validate
 
+  # Each matrix entry's `environment` is a space-separated list of the
+  # zh/environments/*.lock.txt groups that unit's manifest declares (core is
+  # always installed separately below). The Preface (optional-modeling/bambi,
+  # still unresolved) is intentionally not in this matrix -- see
+  # zh/environments/README.md for current status. Chapter 7's heaviest cell
+  # (see system-dependencies.md) needs native PyTensor compilation to fit
+  # comfortably in this profile's timeout; a header-less runner without it
+  # may need a larger timeout override.
   smoke:
     name: Smoke ${{ matrix.unit }} (${{ matrix.environment }})
     if: github.event_name == 'workflow_dispatch' && inputs.run_smoke
@@ -63,13 +71,37 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - unit: dedication
+            environment: pymc
+          - unit: foreword
+            environment: pymc
+          - unit: symbol-list
+            environment: pymc
           - unit: chapter-1
             environment: pymc
           - unit: chapter-2
             environment: pymc
           - unit: chapter-3
+            environment: pymc tfp
+          - unit: chapter-4
+            environment: pymc tfp
+          - unit: chapter-5
             environment: pymc
+          - unit: chapter-6
+            environment: pymc tfp
+          - unit: chapter-7
+            environment: pymc bart
+          - unit: chapter-8
+            environment: pymc ml
           - unit: chapter-9
+            environment: pymc
+          - unit: chapter-10
+            environment: pymc tfp ppl
+          - unit: chapter-11
+            environment: pymc tfp
+          - unit: glossary
+            environment: pymc
+          - unit: references
             environment: pymc
     steps:
       - uses: actions/checkout@v4
@@ -79,11 +111,25 @@ jobs:
           cache: pip
           cache-dependency-path: |
             zh/environments/core.lock.txt
-            zh/environments/${{ matrix.environment }}.lock.txt
+            zh/environments/*.lock.txt
       - name: Install execution stack
         run: |
-          python -m pip install -r zh/environments/core.lock.txt
-          python -m pip install -r "zh/environments/${{ matrix.environment }}.lock.txt"
+          # PyTensor 2.38.x declares numba<=0.65.1, which has no Python 3.12
+          # wheel below 0.59 and conflicts with numpy==2.5.2 on every 0.59-
+          # 0.65.1 release -- a normal resolve of the full stack in one pass
+          # walks that range down to a source-only build that fails outright
+          # on 3.12. Nothing in this project uses PyTensor's numba backend
+          # (see zh/environments/system-dependencies.md), so pre-installing
+          # the verified numba/llvmlite pair normally, then PyTensor with
+          # --no-deps to skip re-checking that bound, avoids the walk before
+          # the rest of the stack resolves its other dependencies normally.
+          python -m pip install numba==0.67.0 llvmlite==0.49.0
+          python -m pip install --no-deps pytensor==2.38.3
+          args="-r zh/environments/core.lock.txt"
+          for group in ${{ matrix.environment }}; do
+            args="$args -r zh/environments/$group.lock.txt"
+          done
+          python -m pip install $args
           python -m pip check
       - name: Execute staged smoke build
         run: >-
@@ -109,13 +155,37 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - unit: dedication
+            environment: pymc
+          - unit: foreword
+            environment: pymc
+          - unit: symbol-list
+            environment: pymc
           - unit: chapter-1
             environment: pymc
           - unit: chapter-2
             environment: pymc
           - unit: chapter-3
+            environment: pymc tfp
+          - unit: chapter-4
+            environment: pymc tfp
+          - unit: chapter-5
             environment: pymc
+          - unit: chapter-6
+            environment: pymc tfp
+          - unit: chapter-7
+            environment: pymc bart
+          - unit: chapter-8
+            environment: pymc ml
           - unit: chapter-9
+            environment: pymc
+          - unit: chapter-10
+            environment: pymc tfp ppl
+          - unit: chapter-11
+            environment: pymc tfp
+          - unit: glossary
+            environment: pymc
+          - unit: references
             environment: pymc
     steps:
       - uses: actions/checkout@v4
@@ -125,11 +195,18 @@ jobs:
           cache: pip
           cache-dependency-path: |
             zh/environments/core.lock.txt
-            zh/environments/${{ matrix.environment }}.lock.txt
+            zh/environments/*.lock.txt
       - name: Install release stack
         run: |
-          python -m pip install -r zh/environments/core.lock.txt
-          python -m pip install -r "zh/environments/${{ matrix.environment }}.lock.txt"
+          # See the smoke job's "Install execution stack" step for why numba
+          # and PyTensor are staged separately before the rest of the stack.
+          python -m pip install numba==0.67.0 llvmlite==0.49.0
+          python -m pip install --no-deps pytensor==2.38.3
+          args="-r zh/environments/core.lock.txt"
+          for group in ${{ matrix.environment }}; do
+            args="$args -r zh/environments/$group.lock.txt"
+          done
+          python -m pip install $args
           python -m pip check
       - name: Execute staged release check
         run: >-

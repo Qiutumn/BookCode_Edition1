@@ -1,0 +1,48 @@
+#+TITLE: 序言
+#+LANGUAGE: zh-CN
+#+OPTIONS: toc:3 num:2
+#+STARTUP: showall
+
+*** 中文版补充: 中文版说明与授权
+
+原著作者: Osvaldo A. Martin, Ravin Kumar, Junpeng Lao
+
+原书: /Bayesian Modeling and Computation in Python/ (Chapman & Hall/CRC, 2021), ISBN 978-0-367-89436-8
+
+原始仓库: [[https://github.com/BayesianModelingandComputationInPython/BookCode_Edition1][BayesianModelingandComputationInPython/BookCode_Edition1]]
+
+本单元译自 =markdown/foreword.md=。本中文版在保留原意、结构、引用、公式与代码的基础上完成简体中文翻译,并在确有需要时将代码更新为当前公开的 PyMC、PyTensor、ArviZ 等 API。新增内容统一标为“中文版补充”,行为或 API 变化统一标为“中文版现代化说明”。
+
+授权范围严格遵循原仓库 =welcome.md=:
+
+- 本书内容中除代码以外的部分采用 [[http://creativecommons.org/licenses/by-nc-sa/4.0/][Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License]] (CC BY-NC-SA 4.0) 授权。
+- 代码(包括代码块与 Jupyter notebooks)采用 [[https://github.com/BayesianModelingandComputationInPython/BookCode_Edition1/blob/main/LICENSE][GNU GENERAL PUBLIC LICENSE Version 2]] (GPL-2.0) 授权。
+
+因此,本中文版不声称全部内容均采用 GPL 授权。翻译与现代化改动不改变原内容各自适用的授权范围。
+
+<<foreword>>
+
+* 序言
+
+#+BEGIN_QUOTE
+贝叶斯建模(Bayesian modeling)为许多数据科学和决策问题提供了一种优雅的方法。
+然而,要让它在实践中良好运作并不容易。尤其是,虽然 Stan、PyMC3、
+TensorFlow Probability(TFP)和 Pyro 等许多软件包都能让复杂层级模型的指定
+变得简单,用户仍然需要额外的工具来诊断计算结果是否正确。当事情确实出错时,
+他们可能也需要有关如何处理问题的建议。
+
+本书重点介绍 ArviZ 库。它让用户能够对贝叶斯模型进行探索性分析
+(exploratory analysis of Bayesian models),例如诊断由任意推断方法生成的
+后验样本。这些工具可用于诊断贝叶斯推断中的多种失效模式。本书还讨论了各种
+建模策略(例如中心化,centering),用来消除许多最常见的问题。书中的大多数
+示例使用 PyMC3,也有一些使用 TFP;书中还简要比较了其他概率编程语言
+(probabilistic programming languages, PPLs)。
+
+三位作者都是贝叶斯软件领域的专家,也是 PyMC3、ArviZ 和 TFP 库的主要贡献者。
+他们在实践中应用贝叶斯数据分析方面也拥有丰富经验,这一点体现在本书所采用的
+实践导向方法中。总的来说,我认为本书为相关文献增添了宝贵内容,并希望它能
+进一步推动贝叶斯方法的采用。
+
+
+--- /Kevin P. Murphy/
+#+END_QUOTE

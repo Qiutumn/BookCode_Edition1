@@ -1,0 +1,4 @@
+筛选行数             336
+非缺失 ARR_DELAY    336
+缺失 ARR_DELAY       0
+dtype: int64

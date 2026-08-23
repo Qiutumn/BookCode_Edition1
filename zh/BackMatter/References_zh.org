@@ -1,0 +1,358 @@
+#+TITLE: 参考文献
+#+LANGUAGE: zh-CN
+#+OPTIONS: toc:3 num:2
+#+STARTUP: showall
+
+* 参考文献
+
+以下条目由仓库根目录的 =bibtex.bib= 确定性生成。论文、书籍和会议录的正式题名保留其发表时的
+语言,以便准确检索;作者、出版物、年份、DOI 等元数据同样保持原貌。章节中的引用键会在构建时
+与本列表交叉校验。
+
+*GelmanBayesianDataAnalysis2013* — Gelman, A.; Carlin, J.B.; Stern, H.S.; Dunson, D.B.; Vehtari, A.; Rubin, D.B.. /Bayesian Data Analysis, Third Edition/. 2013. Taylor & Francis.
+
+*WoodGeneralizedAdditiveModels2017* — Wood, S.N.. /Generalized Additive Models: An Introduction with R, Second Edition/. 2017. CRC Press.
+
+*ChipmanBARTBayesianadditive2010* — Chipman, Hugh A.; George, Edward I.; McCulloch, Robert E.. /BART: Bayesian additive regression trees/. 2010. The Annals of Applied Statistics, vol. 4, no. 1, pp. 266–298.
+
+*ZhouEnsembleMethods2012* — Zhou, Z.H.. /Ensemble Methods: Foundations and Algorithms/. 2012. CRC Press.
+
+*royMondrianProcess* — Roy, Daniel M; Teh, Yee Whye. /The Mondrian process/. 2008. Proceedings of the 21st International Conference on Neural Information Processing Systems, pp. 1377–1384.
+
+*BalogMondrianProcessMachine2015* — Balog, Matej; Teh, Yee Whye. /The Mondrian process for machine learning/. 2015. arXiv preprint arXiv:1507.05181.
+
+*Lakshminarayanan* — Lakshminarayanan, Balaji; Roy, Daniel; Teh, Yee Whye. /Particle Gibbs for Bayesian additive regression trees/. 2015. Artificial Intelligence and Statistics, pp. 553–561.
+
+*blitzstein_2019* — Blitzstein, J.K.; Hwang, J.. /Introduction to Probability, Second Edition/. 2019. CRC Press.
+
+*Kumar2019* — Kumar, Ravin; Carroll, Colin; Hartikainen, Ari; Martin, Osvaldo. /ArviZ a unified library for exploratory analysis of Bayesian models in Python/. 2019. Journal of Open Source Software, vol. 4, no. 33, pp. 1143.
+
+*cox_2006* — Cox, D. R.. /Principles of statistical inference/. 2006. Cambridge University Press, pp. 178.
+
+*vehtari_rank_2019* — Aki Vehtari; Andrew Gelman; Daniel Simpson; Bob Carpenter; Paul-Christian Bürkner. /Rank-Normalization, Folding, and Localization: An Improved $\widehatR$ for Assessing Convergence of MCMC/. 2021. Bayesian Analysis, pp. 1 – 38, DOI: 10.1214/20-BA1221.
+
+*watanabe2010asymptotic* — Watanabe, Sumio; Opper, Manfred. /Asymptotic equivalence of Bayes cross validation and widely applicable information criterion in singular learning theory./. 2010. Journal of machine learning research, vol. 11, no. 12.
+
+*kruschke_2013* — Kruschke, John K. /Bayesian estimation supersedes the t test./. 2013. Journal of Experimental Psychology: General, vol. 142, no. 2, pp. 573.
+
+*10.2307/2979084* — Edgeworth, Francis Y. /The mathematical theory of banking/. 1888. Journal of the Royal Statistical Society, vol. 51, no. 1, pp. 113–127.
+
+*Cover_Thomas* — Cover, T.M.; Thomas, J.A.. /Elements of Information Theory/. 2012. Wiley.
+
+*gneiting_2007* — Gneiting, Tilmann; Raftery, Adrian E. /Strictly proper scoring rules, prediction, and estimation/. 2007. Journal of the American statistical Association, vol. 102, no. 477, pp. 359–378.
+
+*vehtari_pareto_2019* — Vehtari, Aki; Simpson, Daniel; Gelman, Andrew; Yao, Yuling; Gabry, Jonah. /Pareto smoothed importance sampling/. 2021. arXiv preprint arXiv:1507.02646.
+
+*gabry_visualization_2017* — Gabry, Jonah; Simpson, Daniel; Vehtari, Aki; Betancourt, Michael; Gelman, Andrew. /Visualization in Bayesian workflow/. 2019. Journal of the Royal Statistical Society: Series A (Statistics in Society), vol. 182, no. 2, pp. 389–402.
+
+*vehtari_practical_2017* — Vehtari, Aki; Gelman, Andrew; Gabry, Jonah. /Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC/. 2017. Statistics and computing, vol. 27, no. 5, pp. 1413–1432.
+
+*yao_stacking_2018* — Yao, Yuling; Vehtari, Aki; Simpson, Daniel; Gelman, Andrew. /Using stacking to average Bayesian predictive distributions (with discussion)/. 2018. Bayesian Analysis, vol. 13, no. 3, pp. 917–1007.
+
+*akaike_1973* — Akaike, Hirotogu. /Information theory and an extension of the maximum likelihood principle/. 1998. Selected papers of hirotugu akaike, pp. 199–213.
+
+*gilks1995markov* — Gilks, W.R.; Richardson, S.; Spiegelhalter, D.. /Markov Chain Monte Carlo in Practice/. 1995. CRC Press.
+
+*wikipedia_model_2020* — Wikipedia contributors. /Conceptual model –- Wikipedia{,} The Free Encyclopedia/. 年份不详. https://en.wikipedia.org/w/index.php?title=Conceptual_model&oldid=952394363.
+
+*hoeting_bayesian_1999* — Hoeting, Jennifer A; Madigan, David; Raftery, Adrian E; Volinsky, Chris T. /Bayesian model averaging: a tutorial (with comments by M. Clyde, David Draper and EI George, and a rejoinder by the authors/. 1999. Statistical science, vol. 14, no. 4, pp. 382–417.
+
+*Diaconis2011* — Diaconis, Persi. /Theories of Data Analysis: From Magical Thinking Through Classical Statistics/. 2006. Exploring Data Tables, Trends, and Shapes, pp. 1-36.
+
+*WestfallUnderstandingAdvancedStatistical2013* — Westfall, P.; Henning, K.S.S.. /Understanding Advanced Statistical Methods/. 2013. Taylor & Francis.
+
+*Neal_1994* — Neal, Radford M. /Contribution to the discussion of “Approximate Bayesian inference with the weighted likelihood bootstrap” by Michael A. Newton and Adrian E. Raftery/. 1994. Journal of the Royal Statistical Society. Series B (Methodological), vol. 56, pp. 41–42.
+
+*Friel_2011* — Friel, Nial; Wyse, Jason. /Estimating the evidence–a review/. 2012. Statistica Neerlandica, vol. 66, no. 3, pp. 288–308.
+
+*Robert_2009* — Robert, Christian P; Wraith, Darren. /Computational methods for Bayesian model choice/. 2009. Aip conference proceedings, vol. 1193, no. 1, pp. 251–262.
+
+*clark_westerberg_2009* — Clark, Matthew PA.; Westerberg, Brian D.. /How random is the toss of a coin?/. 2009. Cmaj, vol. 181, no. 12, pp. E306–E308.
+
+*mcelreath_2020* — McElreath, R.. /Statistical Rethinking: A Bayesian Course with Examples in R and Stan/. 2020. CRC Press.
+
+*tukey77* — Tukey, John W.. /Exploratory Data Analysis/. 1977. Addison-Wesley.
+
+*Naesseth2019* — Naesseth, Christian A; Lindsten, Fredrik; Sch{\"o}n, Thomas B. /Elements of sequential monte carlo/. 2019. arXiv preprint arXiv:1903.04797.
+
+*Ching2007* — Ching, Jianye; Chen, Yi-Chu. /Transitional Markov chain Monte Carlo method for Bayesian model updating, model class selection, and model averaging/. 2007. Journal of engineering mechanics, vol. 133, no. 7, pp. 816–832.
+
+*delmoral2006* — Del Moral, Pierre; Doucet, Arnaud; Jasra, Ajay. /Sequential monte carlo samplers/. 2006. Journal of the Royal Statistical Society: Series B (Statistical Methodology), vol. 68, no. 3, pp. 411–436.
+
+*Chopin2020* — Chopin, N.; Papaspiliopoulos, O.. /An Introduction to Sequential Monte Carlo/. 2020. Springer International Publishing.
+
+*Marin2012* — Marin, Jean-Michel; Pudlo, Pierre; Robert, Christian P; Ryder, Robin J. /Approximate Bayesian computational methods/. 2012. Statistics and Computing, vol. 22, no. 6, pp. 1167–1180.
+
+*Tukey1977* — Tukey, John W.. /Modern {Techniques} in {Data Analysis}/. 1977. proceesings of the Sponsored Regional Research Conference.
+
+*Rayner2002* — Rayner, Glen D; MacGillivray, Helen L. /Numerical maximum likelihood estimation for the g-and-k and generalized g-and-h distributions/. 2002. Statistics and Computing, vol. 12, no. 1, pp. 57–75.
+
+*Drovandi2011* — Drovandi, Christopher C; Pettitt, Anthony N. /Likelihood-free Bayesian estimation of multivariate quantile distributions/. 2011. Computational Statistics & Data Analysis, vol. 55, no. 9, pp. 2541–2556.
+
+*Bowley1920* — Bowley, A.L.. /Elements of Statistics/. 1920. P.S. King, no. v. 2.
+
+*Moors1988* — Moors, JJA. /A quantile alternative for kurtosis/. 1988. Journal of the Royal Statistical Society: Series D (The Statistician), vol. 37, no. 1, pp. 25–32.
+
+*prangle2017* — Prangle, Dennis. /gk: An R package for the g-and-k and generalised g-and-h distributions/. 2017. arXiv preprint arXiv:1706.06889.
+
+*Bernton_2019* — Bernton, Espen; Jacob, Pierre E; Gerber, Mathieu; Robert, Christian P. /Approximate Bayesian computation with the Wasserstein distance/. 2019. Journal of the Royal Statistical Society: Series B (Statistical Methodology), vol. 81, no. 2, pp. 235–269.
+
+*Jiang2018* — Jiang, Bai. /Approximate Bayesian computation with Kullback-Leibler divergence as data discrepancy/. 2018. International conference on artificial intelligence and statistics, pp. 1711–1721.
+
+*Perez2008* — P{\'e}rez-Cruz, Fernando. /Kullback-Leibler divergence estimation of continuous distributions/. 2008. 2008 IEEE international symposium on information theory, pp. 1666–1670.
+
+*Bentley1975* — Bentley, Jon Louis. /Multidimensional binary search trees used for associative searching/. 1975. Communications of the ACM, vol. 18, no. 9, pp. 509–517.
+
+*Sisson2018* — Sisson, S.A.; Fan, Y.; Beaumont, M.. /Handbook of Approximate Bayesian Computation/. 2018. CRC Press.
+
+*Pudlo2015* — Pudlo, Pierre; Marin, Jean-Michel; Estoup, Arnaud; Cornuet, Jean-Marie; Gautier, Mathieu; Robert, Christian P. /Reliable ABC model choice via random forests/. 2016. Bioinformatics, vol. 32, no. 6, pp. 859–866.
+
+*Beaumont2019* — Beaumont, Mark A.. /Approximate Bayesian Computation/. 2019. Annual review of statistics and its application, vol. 6, pp. 379–403.
+
+*Beaumont2002* — Beaumont, Mark A.; Zhang, Wenyang; Balding, David J. /Approximate Bayesian computation in population genetics/. 2002. Genetics, vol. 162, no. 4, pp. 2025–2035.
+
+*Beaumont2010* — Beaumont, Mark A.. /Approximate Bayesian computation in evolution and ecology/. 2010. Annual review of ecology, evolution, and systematics, vol. 41, pp. 379–406.
+
+*Lintusaari2018* — Lintusaari, Jarno; Vuollekoski, Henri; Kangasraasio, Antti; Skyt{\'e}n, Kusti; Jarvenpaa, Marko; Marttinen, Pekka; Gutmann, Michael U; Vehtari, Aki; Corander, Jukka; Kaski, Samuel. /Elfi: Engine for likelihood-free inference/. 2018. Journal of Machine Learning Research, vol. 19, no. 16, pp. 1–7.
+
+*Dutta2017* — Dutta, Ritabrata; Schoengens, Marcel; Onnela, Jukka-Pekka; Mira, Antonietta. /ABCpy: A user-friendly, extensible, and parallel library for approximate Bayesian computation/. 2017. Proceedings of the platform for advanced scientific computing conference, pp. 1–9.
+
+*Klinger2018* — Klinger, Emmanuel; Rickert, Dennis; Hasenauer, Jan. /pyABC: distributed, likelihood-free inference/. 2018. Bioinformatics, vol. 34, no. 20, pp. 3591–3593.
+
+*PalmerPenguins* — Allison Marie Horst; Alison Presmanes Hill; Kristen B Gorman. /palmerpenguins: Palmer Archipelago (Antarctica) penguin data/. 2020. DOI: 10.5281/zenodo.3960218.
+
+*gradient* — Ioffe, Sergey; Szegedy, Christian. /Batch normalization: Accelerating deep network training by reducing internal covariate shift/. 2015. International conference on machine learning, pp. 448–456.
+
+*fox_fox_2016* — Fox, J.. /Applied Regression Analysis and Generalized Linear Models/. 2015. SAGE Publications.
+
+*Robert2011* — Robert, Christian P; Cornuet, Jean-Marie; Marin, Jean-Michel; Pillai, Natesh S. /Lack of confidence in approximate Bayesian computation model choice/. 2011. Proceedings of the National Academy of Sciences, vol. 108, no. 37, pp. 15112–15117.
+
+*ROS* — Gelman, A.; Hill, J.; Vehtari, A.. /Regression and Other Stories/. 2020. Cambridge University Press.
+
+*LikehoodandPrior* — Gelman, Andrew; Simpson, Daniel; Betancourt, Michael. /The prior can often only be understood in the context of the likelihood/. 2017. Entropy, vol. 19, no. 10, pp. 555.
+
+*Collin2020* — Collin, Fran{\cc}ois-David; Estoup, Arnaud; Marin, Jean-Michel; Raynal, Louis. /Bringing ABC inference to the machine learning realm: AbcRanger, an optimized random forests library for ABC/. 2020. JOBIM 2020, vol. 2020.
+
+*gorman_williams_fraser_2014* — Gorman, Kristen B; Williams, Tony D; Fraser, William R. /Ecological sexual dimorphism and environmental variability within a community of Antarctic penguins (genus Pygoscelis)/. 2014. PloS one, vol. 9, no. 3, pp. e90081.
+
+*Liu2020* — Liu, Yi; Ro{\vc}kov{\'a}, Veronika; Wang, Yuexi. /Variable selection with ABC Bayesian forests/. 2019. Journal of the Royal Statistical Society: Series B (Statistical Methodology).
+
+*Rockova2018* — Ro{\vc}kov{\'a}, Veronika; Saha, Enakshi. /On theory for BART/. 2019. The 22nd International Conference on Artificial Intelligence and Statistics, pp. 2839–2848.
+
+*martin_2018* — Martin, O.. /Bayesian Analysis with Python: Introduction to Statistical Modeling and Probabilistic Programming Using PyMC3 and ArviZ, 2nd Edition/. 2018. Packt Publishing.
+
+*readingSkills* — Hothorn, Torsten; Hornik, Kurt; Strobl, Carolin; Zeileis, Achim. /Party: A laboratory for recursive partytioning/. 2010. https://CRAN.R-project.org/package=party.
+
+*Horiguchi2020* — Horiguchi, Akira; Pratola, Matthew T; Santner, Thomas J. /Assessing variable activity for Bayesian regression trees/. 2021. Reliability Engineering & System Safety, vol. 207, pp. 107391.
+
+*Carlson2020* — Carlson, Colin J.. /embarcadero: Species distribution modelling with Bayesian additive regression trees in R/. 2020. Methods in Ecology and Evolution, vol. 11, no. 7, pp. 850–858.
+
+*Friedman2001* — Friedman, Jerome H. /Greedy function approximation: a gradient boosting machine/. 2001. Annals of statistics, pp. 1189–1232.
+
+*Goldstein2014* — Goldstein, Alex; Kapelner, Adam; Bleich, Justin; Pitkin, Emil. /Peeking inside the black box: Visualizing statistical learning with plots of individual conditional expectation/. 2015. journal of Computational and Graphical Statistics, vol. 24, no. 1, pp. 44–65.
+
+*Molnar2020* — Molnar, Christoph; Casalicchio, Giuseppe; Bischl, Bernd. /Interpretable machine learning–a brief history, state-of-the-art and challenges/. 2020. Joint European Conference on Machine Learning and Knowledge Discovery in Databases, pp. 417–431.
+
+*Molnarbook* — Molnar, C.. /Interpretable Machine Learning/. 2020. Lulu.com.
+
+*Bleich2014* — Bleich, Justin; Kapelner, Adam; George, Edward I; Jensen, Shane T. /Variable selection for BART: an application to gene regulation/. 2014. The Annals of Applied Statistics, pp. 1750–1781.
+
+*Sunnaker2013* — Sunn{\aa}ker, Mikael; Busetto, Alberto Giovanni; Numminen, Elina; Corander, Jukka; Foll, Matthieu; Dessimoz, Christophe. /Approximate bayesian computation/. 2013. PLoS computational biology, vol. 9, no. 1, pp. e1002803.
+
+*Gelman2020* — Gelman, Andrew; Vehtari, Aki; Simpson, Daniel; Margossian, Charles C; Carpenter, Bob; Yao, Yuling; Kennedy, Lauren; Gabry, Jonah; B{\"u}rkner, Paul-Christian; Modr{\'a}k, Martin. /Bayesian workflow/. 2020. arXiv preprint arXiv:2011.01808.
+
+*davidson-pilon_2015* — Davidson-Pilon, C.. /Bayesian Methods for Hackers: Probabilistic Programming and Bayesian Inference/. 2015. Pearson Education.
+
+*gelman2005* — Gelman, Andrew. /Analysis of variance—why it is more important than ever/. 2005. The annals of statistics, vol. 33, no. 1, pp. 1–53.
+
+*nlme* — Jose Pinheiro; Douglas Bates; Saikat DebRoy; Deepayan Sarkar; R Core Team. /nlme: Linear and Nonlinear Mixed Effects Models/. 2020. https://CRAN.R-project.org/package=nlme.
+
+*lme4* — Bates, Douglas; M{\"a}chler, Martin; Bolker, Ben; Walker, Steve. /Fitting linear mixed-effects models using lme4/. 2014. arXiv preprint arXiv:1406.5823.
+
+*gabry_goodrich_2020* — Gabry, Jonah; Goodrich, Ben. /Estimating Generalized (Non-)Linear Models with Group-Specific Terms with rstanarm/. 2020. https://mc-stan.org/rstanarm/articles/glmer.html.
+
+*brms* — B{\"u}rkner, Paul-Christian. /brms: An R package for Bayesian multilevel models using Stan/. 2017. Journal of statistical software, vol. 80, no. 1, pp. 1–28.
+
+*betancourt2013hamiltonian* — Betancourt, Michael; Girolami, Mark. /Hamiltonian Monte Carlo for hierarchical models/. 2015. Current trends in Bayesian methodology with applications, vol. 79, no. 30, pp. 2–4.
+
+*neal_2003* — Neal, Radford M. /Slice sampling/. 2003. The annals of statistics, vol. 31, no. 3, pp. 705–767.
+
+*Gorinova_2019* — Gorinova, Maria I; Gordon, Andrew D; Sutton, Charles. /Probabilistic programming with densities in SlicStan: efficient, flexible, and deterministic/. 2019. Proceedings of the ACM on Programming Languages, vol. 3, no. POPL, pp. 1–30.
+
+*gelman_hill_2006* — Gelman, A.; Hill, J.. /Data Analysis Using Regression and Multilevel/Hierarchical Models/. 2006. Cambridge University Press.
+
+*willard2020minikanren* — Willard, Brandon T. /miniKanren as a Tool for Symbolic Computation in Python/. 2020. arXiv preprint arXiv:2005.11644.
+
+*Foreman_Mackey_2019* — Foreman-Mackey, Daniel; Farr, Will M; Sinha, Manodeep; Archibald, Anne M; Hogg, David W; Sanders, Jeremy S; Zuntz, Joe; Williams, Peter KG; Nelson, Andrew RJ; de Val-Borro, Miguel; others. /emcee v3: A Python ensemble sampling toolkit for affine-invariant MCMC/. 2019. arXiv preprint arXiv:1911.07688.
+
+*Rasmussen2005* — Rasmussen, Carl Edward; Williams, Christopher K. I.. /Gaussian Processes for Machine Learning/. 2005. The MIT Press.
+
+*Downey2014* — Downey, Allen B.. /Think Stats: Exploratory Data Analysis/. 2014. O'Reilly Media;.
+
+*Kruschke2014* — Kruschke, J.K.. /Doing Bayesian Data Analysis: A Tutorial with R, JAGS, and Stan/. 2015. Academic Press.
+
+*westfall2014* — Westfall, Peter H. /Kurtosis as peakedness, 1905–2014. RIP/. 2014. The American Statistician, vol. 68, no. 3, pp. 191–195.
+
+*Duane1987* — Duane, Simon; Kennedy, Anthony D; Pendleton, Brian J; Roweth, Duncan. /Hybrid monte carlo/. 1987. Physics letters B, vol. 195, no. 2, pp. 216–222.
+
+*Brooks2011* — Brooks, S.; Gelman, A.; Jones, G.; Meng, X.L.. /Handbook of Markov Chain Monte Carlo/. 2011. CRC Press.
+
+*Betancourt2017* — Betancourt, Michael. /A conceptual introduction to Hamiltonian Monte Carlo/. 2017. arXiv preprint arXiv:1701.02434.
+
+*Hoffman2014* — Hoffman, Matthew D; Gelman, Andrew. /The No-U-Turn Sampler: Adaptively Setting Path Lengths in Hamiltonian Monte Carlo/. 2014. Journal of Machine Learning Research, vol. 15, no. 47, pp. 1593–1623.
+
+*Lakens2018* — Lakens, Daniel; Adolfi, Federico G.; Albers, Casper J.; Anvari, Farid; Apps, Matthew A. J.; Argamon, Shlomo E.; Baguley, Thom; Becker, Raymond B.; Benning, Stephen D.; Bradford, Daniel E.; Buchanan, Erin M.; Caldwell, Aaron R.; Van Calster, Ben; Carlsson, Rickard; Chen, Sau-Chin; Chung, Bryan; Colling, Lincoln J.; Collins, Gary S.; Crook, Zander; Cross, Emily S.; Daniels, Sameera; Danielsson, Henrik; DeBruine, Lisa; Dunleavy, Daniel J.; Earp, Brian D.; Feist, Michele I.; Ferrell, Jason D.; Field, James G.; Fox, Nicholas W.; Friesen, Amanda; Gomes, Caio; Gonzalez-Marquez, Monica; Grange, James A.; Grieve, Andrew P.; Guggenberger, Robert; Grist, James; van Harmelen, Anne-Laura; Hasselman, Fred; Hochard, Kevin D.; Hoffarth, Mark R.; Holmes, Nicholas P.; Ingre, Michael; Isager, Peder M.; Isotalus, Hanna K.; Johansson, Christer; Juszczyk, Konrad; Kenny, David A.; Khalil, Ahmed A.; Konat, Barbara; Lao, Junpeng; Larsen, Erik Gahner; Lodder, Gerine M. A.; Lukavský, Jiří; Madan, Christopher R.; Manheim, David; Martin, Stephen R.; Martin, Andrea E.; Mayo, Deborah G.; McCarthy, Randy J.; McConway, Kevin; McFarland, Colin; Nio, Amanda Q. X.; Nilsonne, Gustav; de Oliveira, Cilene Lino; de Xivry, Jean-Jacques Orban; Parsons, Sam; Pfuhl, Gerit; Quinn, Kimberly A.; Sakon, John J.; Saribay, S. Adil; Schneider, Iris K.; Selvaraju, Manojkumar; Sjoerds, Zsuzsika; Smith, Samuel G.; Smits, Tim; Spies, Jeffrey R.; Sreekumar, Vishnu; Steltenpohl, Crystal N.; Stenhouse, Neil; Swiatkowski, Wojciech; Vadillo, Miguel A.; Van Assen, Marcel A. L. M.; Williams, Matt N.; Williams, Samantha E.; Williams, Donald R.; Yarkoni, Tal; Ziano, Ignazio; Zwaan, Rolf A.. /Justify your alpha/. 2018. Nature Human Behaviour, vol. 2, no. 3, pp. 168–171.
+
+*Deming2016* — Deming, David. /Do extraordinary claims require extraordinary evidence?/. 2016. Philosophia, vol. 44, no. 4, pp. 1319–1331.
+
+*Haario2001* — Haario, Heikki; Saksman, Eero; Tamminen, Johanna. /An adaptive Metropolis algorithm/. 2001. Bernoulli, pp. 223–242.
+
+*Sejdinovic2014* — Sejdinovic, Dino; Strathmann, Heiko; Garcia, Maria Lomeli; Andrieu, Christophe; Gretton, Arthur. /Kernel adaptive metropolis-hastings/. 2014. International conference on machine learning, pp. 1665–1673.
+
+*Roberts2009* — Roberts, Gareth O; Rosenthal, Jeffrey S. /Examples of adaptive MCMC/. 2009. Journal of computational and graphical statistics, vol. 18, no. 2, pp. 349–367.
+
+*Andrieu2008* — Andrieu, Christophe; Thoms, Johannes. /A tutorial on adaptive MCMC/. 2008. Statistics and computing, vol. 18, no. 4, pp. 343–373.
+
+*Roberts1997* — Gelman, Andrew; Gilks, Walter R; Roberts, Gareth O. /Weak convergence and optimal scaling of random walk Metropolis algorithms/. 1997. The annals of applied probability, vol. 7, no. 1, pp. 110–120.
+
+*Metropolis1953* — Metropolis, Nicholas; Rosenbluth, Arianna W; Rosenbluth, Marshall N; Teller, Augusta H; Teller, Edward. /Equation of state calculations by fast computing machines/. 1953. The journal of chemical physics, vol. 21, no. 6, pp. 1087–1092.
+
+*Hastings1970* — HASTINGS, WK. /Monte Carlo sampling methods using Markov chains and their applications/. 1970. Biometrika, vol. 57, no. 1, pp. 97–109.
+
+*Rosenbluth2003* — Rosenbluth, Marshall N. /Genesis of the Monte Carlo algorithm for statistical mechanics/. 2003. AIP Conference Proceedings, vol. 690, no. 1, pp. 22–30.
+
+*Roberts2001* — Roberts, Gareth O; Rosenthal, Jeffrey S. /Optimal scaling for various Metropolis-Hastings algorithms/. 2001. Statistical science, vol. 16, no. 4, pp. 351–367.
+
+*Bedard2008* — Bedard, Mylene. /Optimal acceptance rates for Metropolis algorithms: Moving beyond 0.234/. 2008. Stochastic Processes and their Applications, vol. 118, no. 12, pp. 2198–2222.
+
+*Sherlock2013* — Sherlock, Chris. /Optimal scaling of the random walk Metropolis: general criteria for the 0.234 acceptance rule/. 2013. Journal of Applied Probability, vol. 50, no. 1, pp. 1–15.
+
+*Potter2015* — Potter, Christopher CJ; Swendsen, Robert H. /0.234: The myth of a universal acceptance ratio for Monte Carlo simulations/. 2015. Physics Procedia, vol. 68, pp. 120–124.
+
+*gilks_thomas_spiegelhalter_1994* — Gilks, Wally R; Thomas, Andrew; Spiegelhalter, David J. /A language and program for complex Bayesian modelling/. 1994. Journal of the Royal Statistical Society: Series D (The Statistician), vol. 43, no. 1, pp. 169–177.
+
+*carpenter_2017* — Carpenter, Bob; Gelman, Andrew; Hoffman, Matthew D; Lee, Daniel; Goodrich, Ben; Betancourt, Michael; Brubaker, Marcus; Guo, Jiqiang; Li, Peter; Riddell, Allen. /Stan: A probabilistic programming language/. 2017. Journal of statistical software, vol. 76, no. 1, pp. 1–32.
+
+*rubin_1981* — Rubin, Donald B. /Estimation in parallel randomized experiments/. 1981. Journal of Educational Statistics, vol. 6, no. 4, pp. 377–401.
+
+*Martin2020* — Martin, Gael M; Frazier, David T; Robert, Christian P. /Computing Bayes: Bayesian computation from 1763 to the 21st century/. 2020. arXiv preprint arXiv:2004.06425.
+
+*kruschke_liddell_2017* — Kruschke, John K; Liddell, Torrin M. /The Bayesian New Statistics: Hypothesis testing, estimation, meta-analysis, and power analysis from a Bayesian perspective/. 2018. Psychonomic Bulletin & Review, vol. 25, no. 1, pp. 178–206.
+
+*capretto2020* — Capretto, Tom{\'a}s; Piho, Camen; Kumar, Ravin; Westfall, Jacob; Yarkoni, Tal; Martin, Osvaldo A. /Bambi: a simple interface for fitting bayesian linear models in Python/. 2020. arXiv preprint arXiv:2012.10754.
+
+*grubbs_1969* — Grubbs, Frank E. /Procedures for detecting outlying observations in samples/. 1969. Technometrics, vol. 11, no. 1, pp. 1–21.
+
+*Potvin1990* — Potvin, Catherine; Lechowicz, Martin J; Tardif, Serge. /The statistical analysis of ecophysiological response curves obtained from experiments involving repeated measures/. 1990. Ecology, vol. 71, no. 4, pp. 1389–1400.
+
+*Pedersen2019* — Pedersen, Eric J; Miller, David L; Simpson, Gavin L; Ross, Noam. /Hierarchical generalized additive models in ecology: an introduction with mgcv/. 2019. PeerJ, vol. 7, pp. e6876.
+
+*lemoine_2019* — Lemoine, Nathan P. /Moving beyond noninformative priors: why and how to choose weakly informative priors in Bayesian analyses/. 2019. Oikos, vol. 128, no. 7, pp. 912–928.
+
+*Burkner2020* — B{\"u}rkner, Paul-Christian; Gabry, Jonah; Vehtari, Aki. /Approximate leave-future-out cross-validation for Bayesian time series models/. 2020. Journal of Statistical Computation and Simulation, vol. 90, no. 14, pp. 2499–2523.
+
+*Salvatier2016* — Salvatier, John; Wiecki, Thomas V; Fonnesbeck, Christopher. /Probabilistic programming in Python using PyMC3/. 2016. PeerJ Computer Science, vol. 2, pp. e55.
+
+*TaylorLetham2018* — Taylor, Sean J; Letham, Benjamin. /Forecasting at scale/. 2018. The American Statistician, vol. 72, no. 1, pp. 37–45.
+
+*adams2007bayesian* — Adams, Ryan Prescott; MacKay, David JC. /Bayesian online changepoint detection/. 2007. arXiv preprint arXiv:0710.3742.
+
+*109876* — Harvey, Andrew C; Shephard, Neil. /Structural time series models/. 1993. Handbook of Statistics,(edited by GS Maddala, CR Rao and HD Vinod), vol. 11, pp. 261–302.
+
+*piponi2020joint* — Piponi, Dan; Moore, Dave; Dillon, Joshua V.. /Joint distributions for tensorflow probability/. 2020. arXiv preprint arXiv:2001.11819.
+
+*sarkka2013bayesian* — S{\"a}rkk{\"a}, S.. /Bayesian Filtering and Smoothing/. 2013. Cambridge University Press.
+
+*box2008time* — Box, G.E.P.; Jenkins, G.M.; Reinsel, G.C.. /Time Series Analysis: Forecasting and Control/. 2008. Wiley.
+
+*durbin2012time* — Durbin, James; Koopman, Siem Jan. /Time series analysis by state space methods/. 2012. Oxford university press.
+
+*shumway2019time* — Shumway, R.; Stoffer, D.. /Time Series: A Data Analysis Approach Using R/. 2019. CRC Press.
+
+*lao2020tfpmcmc* — Lao, Junpeng; Suter, Christopher; Langmore, Ian; Chimisov, Cyril; Saxena, Ashish; Sountsov, Pavel; Moore, Dave; Saurous, Rif A; Hoffman, Matthew D; Dillon, Joshua V.. /tfp.mcmc: Modern Markov chain Monte Carlo tools built for modern hardware/. 2020. arXiv preprint arXiv:2002.01184.
+
+*westharrison1997* — West, M.; Harrison, J.. /Bayesian Forecasting and Dynamic Models/. 2013. Springer New York.
+
+*betancourt_2020_worfklow* — Betancourt, Michael. /Towards A Principled Bayesian Workflow/. 2020. https://betanalpha.github.io/assets/case_studies/principled_bayesian_workflow.html.
+
+*kammar2013handlers* — Kammar, Ohad; Lindley, Sam; Oury, Nicolas. /Handlers in action/. 2013. ACM SIGPLAN Notices, vol. 48, no. 9, pp. 145–158.
+
+*bingham2019pyro* — Bingham, Eli; Chen, Jonathan P; Jankowiak, Martin; Obermeyer, Fritz; Pradhan, Neeraj; Karaletsos, Theofanis; Singh, Rohit; Szerlip, Paul; Horsfall, Paul; Goodman, Noah D. /Pyro: Deep universal probabilistic programming/. 2019. The Journal of Machine Learning Research, vol. 20, no. 1, pp. 973–978.
+
+*phan2019composable* — Phan, Du; Pradhan, Neeraj; Jankowiak, Martin. /Composable effects for flexible and accelerated probabilistic programming in NumPyro/. 2019. arXiv preprint arXiv:1912.11554.
+
+*tran2018simple* — Tran, Dustin; Hoffman, Matthew; Moore, Dave; Suter, Christopher; Vasudevan, Srinivas; Radul, Alexey; Johnson, Matthew; Saurous, Rif A. /Simple, distributed, and accelerated probabilistic programming/. 2018. arXiv preprint arXiv:1811.02091.
+
+*moore2018effect* — Moore, Dave; Gorinova, Maria I. /Effect handling for composable program transformations in edward2/. 2018. arXiv preprint arXiv:1811.06150.
+
+*dillon2017tensorflow* — Dillon, Joshua V.; Langmore, Ian; Tran, Dustin; Brevdo, Eugene; Vasudevan, Srinivas; Moore, Dave; Patton, Brian; Alemi, Alex; Hoffman, Matt; Saurous, Rif A. /Tensorflow distributions/. 2017. arXiv preprint arXiv:1711.10604.
+
+*papamakarios2019normalizing* — Papamakarios, George; Nalisnick, Eric; Rezende, Danilo Jimenez; Mohamed, Shakir; Lakshminarayanan, Balaji. /Normalizing flows for probabilistic modeling and inference/. 2019. arXiv preprint arXiv:1912.02762.
+
+*bickel2008sharp* — Bickel, Peter; Li, Bo; Bengtsson, Thomas; others. /Sharp failure rates for the bootstrap particle filter in high dimensions/. 2008. Pushing the limits of contemporary statistics: Contributions in honor of Jayanta K. Ghosh, pp. 318–329.
+
+*wood2014new* — Wood, Frank; Meent, Jan Willem; Mansinghka, Vikash. /A new approach to probabilistic programming inference/. 2014. Artificial Intelligence and Statistics, pp. 1024–1032.
+
+*van2018introduction* — van de Meent, Jan-Willem; Paige, Brooks; Yang, Hongseok; Wood, Frank. /An introduction to probabilistic programming/. 2018. arXiv preprint arXiv:1809.10756.
+
+*tolpin2016design* — Tolpin, David; van de Meent, Jan-Willem; Yang, Hongseok; Wood, Frank. /Design and implementation of probabilistic programming language anglican/. 2016. Proceedings of the 28th Symposium on the Implementation and Application of Functional programming Languages, pp. 1–12.
+
+*Paananen2020* — Paananen, Topi; Piironen, Juho; B{\"u}rkner, Paul-Christian; Vehtari, Aki. /Implicitly adaptive importance sampling/. 2021. Statistics and Computing, vol. 31, no. 2, pp. 1–19.
+
+*breiman2001* — Breiman, Leo. /Statistical modeling: The two cultures (with comments and a rejoinder by the author)/. 2001. Statistical science, vol. 16, no. 3, pp. 199–231.
+
+*BreimanForests2001* — Breiman, Leo. /Random forests/. 2001. Machine learning, vol. 45, no. 1, pp. 5–32.
+
+*Andersen1970* — Andersen, Erling Bernhard. /Sufficiency and exponential families for discrete sample spaces/. 1970. Journal of the American Statistical Association, vol. 65, no. 331, pp. 1248–1255.
+
+*Pitman1936* — Pitman, Edwin James George. /Sufficient statistics and intrinsic accuracy/. 1936. Mathematical Proceedings of the cambridge Philosophical society, vol. 32, no. 4, pp. 567–579.
+
+*Koopman1936* — Koopman, Bernard Osgood. /On distributions admitting a sufficient statistic/. 1936. Transactions of the American Mathematical society, vol. 39, no. 3, pp. 399–409.
+
+*Darmois1935* — Darmois, Georges. /Sur les lois de probabilit{\'e}a estimation exhaustive/. 1935. CR Acad. Sci. Paris, vol. 260, no. 1265, pp. 85.
+
+*AbbottFlatland* — Abbott, E.A.; Jann, R.. /Flatland: A Romance of Many Dimensions/. 2008. OUP Oxford.
+
+*jax2018github* — James Bradbury; Roy Frostig; Peter Hawkins; Matthew James Johnson; Chris Leary; Dougal Maclaurin; George Necula; Adam Paszke; Jake VanderPlas; Skye Wanderman-Milne; Qiao Zhang. /JAX: composable transformations of Python+NumPy programs/. 2018. http://github.com/google/jax.
+
+*Gronau2017* — Gronau, Quentin F; Sarafoglou, Alexandra; Matzke, Dora; Ly, Alexander; Boehm, Udo; Marsman, Maarten; Leslie, David S; Forster, Jonathan J; Wagenmakers, Eric-Jan; Steingroever, Helen. /A tutorial on bridge sampling/. 2017. Journal of mathematical psychology, vol. 81, pp. 80–97.
+
+*Schad2021* — Schad, Daniel J; Nicenboim, Bruno; B{\"u}rkner, Paul-Christian; Betancourt, Michael; Vasishth, Shravan. /Workflow techniques for the robust use of bayes factors/. 2021. arXiv preprint arXiv:2103.08744.
+
+*Navarro2020* — Navarro, Danielle. /A personal essay on Bayes factors/. 2020. PsyArXiv.
+
+*Blei_2017* — Blei, David M.; Kucukelbir, Alp; McAuliffe, Jon D.. /Variational inference: A review for statisticians/. 2017. Journal of the American statistical Association, vol. 112, no. 518, pp. 859–877.
+
+*strang09* — Strang, G.. /Introduction to Linear Algebra/. 2009. Wellesley-Cambridge Press.
+
+*grewal2014kalman* — Grewal, Mohinder S; Andrews, Angus P. /Kalman filtering: Theory and Practice with MATLAB/. 2014. John Wiley & Sons.
+
+*yao2018yes* — Yao, Yuling; Vehtari, Aki; Simpson, Daniel; Gelman, Andrew. /Yes, but did it work?: Evaluating variational inference/. 2018. International Conference on Machine Learning, pp. 5581–5590.
+
+*kucukelbir2016automatic* — Kucukelbir, Alp; Tran, Dustin; Ranganath, Rajesh; Gelman, Andrew; Blei, David M.. /Automatic differentiation variational inference/. 2017. The Journal of Machine Learning Research, vol. 18, no. 1, pp. 430–474.
+
+*betancourt_2020_hierarchical* — Betancourt, Michael. /Hierarchical Modeling/. 2020. https://betanalpha.github.io/assets/case_studies/hierarchical_modeling.html.
+
+*kochurovpymc4* — Kochurov, Max; Carroll, Colin; Wiecki, Thomas; Lao, Junpeng. /PyMC4: Exploiting Coroutines for Implementing a Probabilistic Programming Framework/. 2019. Program Transformations for ML Workshop at NeurIPS, https://openreview.net/forum?id=rkgzj5Za8H.
+
+*carvalho2010horseshoe* — Carvalho, Carlos M.; Polson, Nicholas G.; Scott, James G.. /The horseshoe estimator for sparse signals/. 2010. Biometrika, vol. 97, no. 2, pp. 465–480.
+
+*piironen2017hyperprior* — Piironen, Juho; Vehtari, Aki. /On the hyperprior choice for the global shrinkage parameter in the horseshoe prior/. 2017. Artificial Intelligence and Statistics, pp. 905–913.
+
+*piironen2017sparsity* — Piironen, Juho; Vehtari, Aki; others. /Sparsity information and regularization in the horseshoe and other shrinkage priors/. 2017. Electronic Journal of Statistics, vol. 11, no. 2, pp. 5018–5051.
+
+*riutort2020practical* — Riutort-Mayol, Gabriel; B{\"u}rkner, Paul-Christian; Andersen, Michael R; Solin, Arno; Vehtari, Aki. /Practical Hilbert space approximate Bayesian Gaussian processes for probabilistic programming/. 2020. arXiv preprint arXiv:2004.11408.
+
+*loo_glossary* — Vehtari, Aki.; Gabry, Jonah.. /LOO glossary/. 年份不详. https://mc-stan.org/loo/reference/loo-glossary.html.
+
+*hoyer2017* — Hoyer, Stephan; Hamman, Joe. /xarray: ND labeled arrays and datasets in Python/. 2017. Journal of Open Research Software, vol. 5, no. 1.
+
+*separation_plot* — Greenhill, Brian; Ward, Michael D; Sacks, Audrey. /The separation plot: A new visual method for evaluating the fit of binary models/. 2011. American Journal of Political Science, vol. 55, no. 4, pp. 991–1002.
+
+*Papaspiliopoulos2007* — Papaspiliopoulos, Omiros; Roberts, Gareth O; Sk{\"o}ld, Martin. /A general framework for the parametrization of hierarchical models/. 2007. Statistical Science, pp. 59–73.
+
+*Otto2007* — Otto, S.P.; Day, T.. /A Biologist's Guide to Mathematical Modeling in Ecology and Evolution/. 2011. Princeton University Press.
+
+*Gelman_folk* — Gelman, Andrew. /The Folk Theorem of Statistical Computing/. 2008. https://statmodeling.stat.columbia.edu/2008/05/13/the_folk_theore/.
+
+*gorinova2019automatic* — Gorinova, Maria; Moore, Dave; Hoffman, Matthew. /Automatic reparameterisation of probabilistic programs/. 2020. International Conference on Machine Learning, pp. 3648–3657.

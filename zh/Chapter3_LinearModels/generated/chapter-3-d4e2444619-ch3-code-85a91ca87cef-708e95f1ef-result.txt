@@ -1,0 +1,9 @@
+                   mean     sd  hdi_3%  hdi_97%  mcse_mean  mcse_sd  ess_bulk  \
+β[intercept]     -2.431  0.546  -3.544   -1.527      0.014    0.010    1463.0   
+β[bill_length_z]  7.119  1.163   5.010    9.280      0.030    0.020    1553.0   
+β[mass_z]        -2.465  0.651  -3.648   -1.262      0.016    0.011    1652.0   
+
+                  ess_tail  r_hat  
+β[intercept]        1730.0    1.0  
+β[bill_length_z]    1986.0    1.0  
+β[mass_z]           1925.0    1.0  

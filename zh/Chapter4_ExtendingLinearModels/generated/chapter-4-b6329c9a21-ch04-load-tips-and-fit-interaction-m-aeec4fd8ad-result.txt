@@ -1,0 +1,16 @@
+<xarray.Dataset> Size: 832B
+Dimensions:  (chain: 1, draw: 20, β_dim_0: 3)
+Coordinates:
+  * chain    (chain) int64 8B 0
+  * draw     (draw) int64 160B 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
+  * β_dim_0  (β_dim_0) int64 24B 0 1 2
+Data variables:
+    β        (chain, draw, β_dim_0) float64 480B 3.145 0.1122 ... -0.04468
+    σ        (chain, draw) float64 160B 1.027 1.052 1.019 ... 1.001 1.012 0.999
+Attributes:
+    created_at:                 2026-08-21T15:59:47.375103+00:00
+    arviz_version:              0.23.4
+    inference_library:          pymc
+    inference_library_version:  5.28.5
+    sampling_time:              2.7774200439453125
+    tuning_steps:               20

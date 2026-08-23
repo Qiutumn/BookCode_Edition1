@@ -1,0 +1,4 @@
+    rank  elpd_loo  p_loo  elpd_diff  weight     se   dse  warning scale
+mB     0   -137.87   0.97       0.00     1.0   7.07  0.00    False   log
+mC     1   -138.49   1.91       0.62     0.0   7.02  0.86    False   log
+mA     2   -168.07   1.37      30.20     0.0  10.37  6.57    False   log

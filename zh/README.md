@@ -80,20 +80,30 @@ Notebook 由 `nbclient` 在对应章目录中执行，因此代码中的 `data/.
 - `pymc`：科学计算/PyMC 基础栈，第 1、2、3–9、10、11 章及大部分前后
   辅文都依赖它；
 - `tfp`：已在本机验证的 TensorFlow Probability 栈（第 3、4、6、10、11 章）；
-- `bart`：第 7 章专用的 PyMC-BART 扩展。`bart.in` 中的版本是研究后固定的
-  组合，但本机两个可用 Python 环境都未能安装 `pymc-bart`，因此第 7 章至今
-  只完成了静态校验，从未在本机真正执行过；
+- `bart`：第 7 章专用的 PyMC-BART 扩展，已在本机验证可与上述 pymc 精确版本
+  共存安装（`pymc-bart==0.11.0`，见 `environments/bart.lock.txt`）；
 - `ml`：第 8 章随机森林 ABC 模型选择所需的 scikit-learn，已在本机验证
   （`scikit-learn==1.9.0`，37/37 代码单元零错误执行）；
-- `ppl`：第 10 章 JAX/NumPyro 扩展，与已验证的 TensorFlow Probability 0.25
-  搭配使用；
-- `optional-jax`、`optional-modeling`：尚未在本机安装验证，只有未解析输入，
-  在相应章节发布前必须在目标平台解析、固定版本并测试。
+- `ppl`：第 10 章 JAX/NumPyro 扩展，已在本机验证可与已验证的 TensorFlow
+  Probability 0.25 共存安装（`jax==0.4.38`，见 `environments/ppl.lock.txt`）；
+- `optional-jax`、`optional-modeling`：尚未在本机安装验证，只有未解析输入。
+  `optional-modeling`（Bambi、前言的一个代码单元需要）在 2026-08-21 尝试
+  安装时，把共享环境的 pymc/arviz/pytensor 全部级联升级到不兼容的大版本，
+  因此不能装进上面这个共享环境；在它有独立、隔离的环境之前，前言的这一个
+  单元仍无法执行。
+
+`core`/`pymc`/`tfp`/`bart`/`ml`/`ppl` 安装时务必按 `environments/README.md`
+给出的顺序执行（先固定 `numba`/`llvmlite`，再以 `--no-deps` 安装
+`pytensor`，然后再装其余锁定文件），否则 PyTensor 2.38.x 对 `numba` 的
+过严声明（`<=0.65.1`）会让 pip 把 `numba` 一路回退到没有 Python 3.12 轮子
+的旧版本，导致安装彻底失败——这不是本项目引入的问题，而是该依赖链本身
+在全新环境下的既有缺陷。
 
 默认 `requirements.txt` 只组合 `core` 与 `pymc` 直接依赖，用于最小化安装第
-1–2 章。精确版本来自 2026-08-20 的 Python 3.12.3 项目环境，不声称是完整的
-传递依赖冻结。安装后必须运行 `python -m pip check`。系统包及
-Pandoc/Graphviz 说明见 `environments/system-dependencies.md`。
+1–2 章。精确版本来自 2026-08-20（`bart`/`ml`/`ppl` 为 2026-08-21）的
+Python 3.12.3 项目环境，不声称是完整的传递依赖冻结。安装后必须运行
+`python -m pip check`。系统包及 Pandoc/Graphviz 说明见
+`environments/system-dependencies.md`。
 
 ## 许可
 

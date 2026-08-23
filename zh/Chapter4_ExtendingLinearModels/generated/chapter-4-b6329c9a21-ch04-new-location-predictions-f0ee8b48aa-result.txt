@@ -1,0 +1,8 @@
+(array([-100.54211, -102.70381, -104.60781], dtype=float32),
+ <xarray.Dataset> Size: 1kB
+ Dimensions:             (customer: 40, hdi: 2)
+ Coordinates:
+   * customer            (customer) int64 320B 50 51 52 53 54 ... 85 86 87 88 89
+   * hdi                 (hdi) <U6 48B 'lower' 'higher'
+ Data variables:
+     new_location_sales  (customer, hdi) float64 640B -313.7 63.31 ... 112.6)

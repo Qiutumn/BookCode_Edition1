@@ -1,0 +1,11 @@
+         mean     sd  hdi_3%  hdi_97%  mcse_mean  mcse_sd  ess_bulk  ess_tail  \
+beta_1 -0.894  0.908  -1.916    0.450      0.452    0.183       4.0       4.0   
+beta_2  0.015  1.358  -1.797    1.949      0.676    0.308       4.0       4.0   
+beta_3  0.867  0.612   0.032    1.761      0.305    0.152       4.0       4.0   
+sigma   1.819  1.423   0.283    3.947      0.709    0.287       4.0       4.0   
+
+        r_hat  
+beta_1    NaN  
+beta_2    NaN  
+beta_3    NaN  
+sigma     NaN  

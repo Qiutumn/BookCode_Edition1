@@ -1,0 +1,23 @@
+digraph {
+	"σ" [label="σ
+~
+Halfnormal" shape=ellipse]
+	subgraph "clustermeal (3)" {
+		"β" [label="β
+~
+Normal" shape=ellipse]
+		label="meal (3)" labeljust=r labelloc=b style=rounded
+	}
+	subgraph "clusterobservation (468)" {
+		sales [label="sales
+~
+Normal" shape=ellipse style=filled]
+		"μ" [label="μ
+~
+Deterministic" shape=box]
+		label="observation (468)" labeljust=r labelloc=b style=rounded
+	}
+	"β" -> "μ"
+	"μ" -> sales
+	"σ" -> sales
+}

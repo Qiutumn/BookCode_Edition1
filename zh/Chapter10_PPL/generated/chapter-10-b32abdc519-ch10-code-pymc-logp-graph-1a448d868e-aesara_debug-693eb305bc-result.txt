@@ -1,0 +1,1 @@
+<ipykernel.iostream.OutStream at 0x7733c39b3880>

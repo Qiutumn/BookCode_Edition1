@@ -1,0 +1,6 @@
+           body_mass_g                  
+                  mean         std count
+species                                 
+Adelie     3706.164384  458.620135   146
+Chinstrap  3733.088235  384.335081    68
+Gentoo     5092.436975  501.476154   119

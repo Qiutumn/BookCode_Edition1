@@ -1,0 +1,9 @@
+<xarray.Dataset> Size: 24B
+Dimensions:      ()
+Data variables:
+    bad_chains0  float64 8B 0.1077
+    bad_chains1  float64 8B 0.01781
+    good_chains  float64 8B 0.002381
+Attributes:
+    created_at:     2026-08-23T08:21:27.914988+00:00
+    arviz_version:  0.23.4

@@ -1,0 +1,6 @@
+{'pymc': True,
+ 'pytensor': True,
+ 'jax': True,
+ 'tensorflow': True,
+ 'tensorflow_probability': True,
+ 'numpyro': True}

@@ -1,0 +1,33 @@
+              mean   sd  hdi_3%  hdi_97%  mcse_mean  mcse_sd  ess_bulk  \
+beta[0]      0.314  0.0   0.314    0.314        0.0      NaN      20.0   
+beta[1]      0.318  0.0   0.318    0.318        0.0      NaN      20.0   
+beta[2]     -0.476  0.0  -0.476   -0.476        0.0      NaN      20.0   
+beta[3]     -0.345  0.0  -0.345   -0.345        0.0      NaN      20.0   
+beta[4]     -1.875  0.0  -1.875   -1.875        0.0      0.0      20.0   
+beta[5]      1.609  0.0   1.609    1.609        0.0      0.0      20.0   
+beta_mu      0.896  0.0   0.896    0.896        0.0      NaN      20.0   
+beta_sigma   0.229  0.0   0.229    0.229        0.0      NaN      20.0   
+sigma[0]     0.552  0.0   0.552    0.552        0.0      0.0      20.0   
+sigma[1]     0.763  0.0   0.763    0.763        0.0      NaN      20.0   
+sigma[2]     0.529  0.0   0.529    0.529        0.0      0.0      20.0   
+sigma[3]     0.376  0.0   0.376    0.376        0.0      NaN      20.0   
+sigma[4]     0.379  0.0   0.379    0.379        0.0      0.0      20.0   
+sigma[5]     0.961  0.0   0.961    0.961        0.0      0.0      20.0   
+sigma_prior  0.870  0.0   0.870    0.870        0.0      0.0      20.0   
+
+             ess_tail  r_hat  
+beta[0]          20.0    NaN  
+beta[1]          20.0    NaN  
+beta[2]          20.0    NaN  
+beta[3]          20.0    NaN  
+beta[4]          20.0    NaN  
+beta[5]          20.0    NaN  
+beta_mu          20.0    NaN  
+beta_sigma       20.0    NaN  
+sigma[0]         20.0    NaN  
+sigma[1]         20.0    NaN  
+sigma[2]         20.0    NaN  
+sigma[3]         20.0    NaN  
+sigma[4]         20.0    NaN  
+sigma[5]         20.0    NaN  
+sigma_prior      20.0    NaN  
