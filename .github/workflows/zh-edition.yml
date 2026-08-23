@@ -147,7 +147,18 @@ jobs:
           for group in $nodeps_groups; do
             python -m pip install --no-deps -r "zh/environments/$group.lock.txt"
           done
-          python -m pip check
+          # pip check will always flag one intentionally accepted mismatch
+          # (pytensor's declared numba<=0.65.1 ceiling vs the numba==0.67.0
+          # this project actually uses -- see system-dependencies.md); fail
+          # only on anything beyond that exact line, so a real new conflict
+          # still stops the build.
+          check_output="$(python -m pip check 2>&1 || true)"
+          echo "$check_output"
+          unexpected="$(echo "$check_output" | grep -v -F 'pytensor 2.38.3 has requirement numba<=0.65.1,>=0.58, but you have numba 0.67.0.' || true)"
+          if [ -n "$unexpected" ]; then
+            echo "::error::pip check reported unexpected problems (see above)"
+            exit 1
+          fi
       - name: Execute staged smoke build
         run: >-
           python zh/tools/build_book.py build
@@ -235,7 +246,18 @@ jobs:
           for group in $nodeps_groups; do
             python -m pip install --no-deps -r "zh/environments/$group.lock.txt"
           done
-          python -m pip check
+          # pip check will always flag one intentionally accepted mismatch
+          # (pytensor's declared numba<=0.65.1 ceiling vs the numba==0.67.0
+          # this project actually uses -- see system-dependencies.md); fail
+          # only on anything beyond that exact line, so a real new conflict
+          # still stops the build.
+          check_output="$(python -m pip check 2>&1 || true)"
+          echo "$check_output"
+          unexpected="$(echo "$check_output" | grep -v -F 'pytensor 2.38.3 has requirement numba<=0.65.1,>=0.58, but you have numba 0.67.0.' || true)"
+          if [ -n "$unexpected" ]; then
+            echo "::error::pip check reported unexpected problems (see above)"
+            exit 1
+          fi
       - name: Execute staged release check
         run: >-
           python zh/tools/build_book.py release
